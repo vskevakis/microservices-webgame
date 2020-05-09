@@ -12,3 +12,23 @@ services:
     auth-db:
         image: postgres:latest
         env_file: ./auth/postgres.env
+    nginx:
+        build: ./nginx
+        image: nginx:latest
+        ports: 
+            - 80:80
+    client:
+        build: ./client
+        image: client:latest
+    # playmaster:
+    #     build: ./playmaster
+    #     image: playmaster:latest
+    #     env_file: ./playmaster/redis.env
+    #     ports:
+    #         - 5001:5001
+    #     depends_on:
+    #         - playmaster-db
+    # playmaster-db:
+    #     image: redis:latest
+    #     env_file: ./playmaster/redis.env          
+    
