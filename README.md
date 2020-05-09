@@ -7,5 +7,6 @@ Microservices multiplayer webgame for Distributed Systems course TUC
 Installation via docker-compose.
 
 ```bash
-sudo docker-compose up --build```
+sudo docker-compose up --build
+```
 
