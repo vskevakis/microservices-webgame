@@ -1,0 +1,12 @@
+# Flask service requirements
+Flask==1.1.2
+pydantic==1.5.1
+urllib3==1.25.9
+requests==2.23.0
+
+# production grade WSGI server
+gunicorn==20.0.4
+
+# Postgres connector
+Flask-SQLAlchemy==2.4.1
+psycopg2-binary==2.8.5
