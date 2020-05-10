@@ -23,8 +23,8 @@ db = SQLAlchemy(app)
 #Database User Model
 class Userscore(db.Model):
     __tablename__ = "user"
-    user_id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(255), unique=True, nullable=False)
+    #user_id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(255), unique=True, nullable=False, primary_key=True)
     Wins = db.Column(db.Integer)
     Ties = db.Column(db.Integer)
     Loses = db.Column(db.Integer)
@@ -37,7 +37,7 @@ db.create_all()
 db.session.commit()
 
 #CreateUser API
-@app.route("/auth/initdb", methods = ["POST"])
+@app.route("/gamemaster/initdb", methods = ["POST"])
 def initdb():
     username = request.json['username']
 
@@ -50,9 +50,15 @@ def initdb():
     db.session.add(user)
     db.session.commit()
 
-    return Response("Userdb created with great success", status = 200)
+    return Response("Userdb created with great success"+username , status = 200)
+
+@app.route("/gamemaster/getscores", methods = ["GET"])
+def getscores():
+    username = request.json['username']
+
+    scores = db.session.query(Userscore).filter_by(username=username).first()
+
+    return str(scores)
 
 if __name__ == "__main__":
     app.run(debug=False)
-
-    

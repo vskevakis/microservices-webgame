@@ -64,8 +64,9 @@ def register():
         )
         db.session.add(user)
         db.session.commit()
-        #test = requests.post("http://localhost:5003/initdb", json={"username": username})
-        return Response("User created with great success", status = 200)
+        # needs work  error handling if add user didnt work
+        test = requests.post("http://gamemaster:5002/gamemaster/initdb", json={"username": username})
+        return Response("User created with great success"+str(test), status = 200)
 
 @app.route("/auth/login", methods = ["GET"])
 def login():
