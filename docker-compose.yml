@@ -31,3 +31,14 @@ services:
     playmaster-db:
         image: redis:latest
         env_file: ./playmaster/redis.env
+    gamemaster:
+        build: ./gamemaster
+        image: gamemaster:latest
+        env_file: ./gamemaster/postgres2.env
+        depends_on:
+            - gamemaster-db
+        ports:
+            - 5002:5002
+    gamemaster-db:
+        image: postgres:latest
+        env_file: ./gamemaster/postgres2.env

@@ -26,10 +26,10 @@ def getstate():
 
 @app.route("/playmaster/initstate", methods=["POST"])
 def initstate():
-    gameid = request.data
-    gameid = json.loads(gameid)
+    gamedate = request.data
+    gameid = json.loads(gamedate)
     data = {}
-    init_state = [gameid['gameid'], 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0]
+    init_state = [gameid['gameid'], gameid['player1'], gameid['player2'], 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0] #last 3 are turn ,winner ,gamefinished
     data['state'] = init_state
     r.set(str(gameid['gameid']), json.dumps(data))
     return Response("correct init"+str(gameid['gameid']), status=200)

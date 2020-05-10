@@ -64,6 +64,7 @@ def register():
         )
         db.session.add(user)
         db.session.commit()
+        #test = requests.post("http://localhost:5003/initdb", json={"username": username})
         return Response("User created with great success", status = 200)
 
 @app.route("/auth/login", methods = ["GET"])
@@ -83,5 +84,3 @@ def login():
 
 if __name__ == "__main__":
     app.run(debug=False)
-
-    
