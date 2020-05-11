@@ -4,6 +4,7 @@ from flask import Flask, jsonify, Response, request
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
+
 # Initialize Application
 app = Flask(__name__)
 
@@ -45,12 +46,13 @@ class Tournament(db.Model):
     __tablename__ = "tournament"
     player1 = db.Column(db.String(255), nullable=False)
     player2 = db.Column(db.String(255), nullable=False)
-    winner = db.Column(db.String(255), primary_key=True)
+    winner = db.Column(db.String(255))
+    gameid = db.Column(db.String(255), primary_key=True)
 
 # Create Database Table and Model
 db.create_all()
 db.session.commit()
-
+from app import Userscore, Queue ,Queuetournament ,Tournament
 
 # CreateUser API
 @app.route("/gamemaster/initdb", methods=["POST"])
@@ -72,7 +74,7 @@ def initdb():
 @app.route("/gamemaster/getscores", methods=["GET"])
 def getscores():
     username = request.json['username']
-    scores = db.session.query(Userscore).filter_by(username=username).first()
+    scores = Userscore.query.filter_by(username=username).first()
 
     return jsonify(scores.json())
 
@@ -82,8 +84,8 @@ def updatescores():
     username = request.json['player1']
     username2 = request.json['player2']
     winner = request.json['winner']
-    scores1 = db.session.query(Userscore).filter_by(username=username).first()
-    scores2 = db.session.query(Userscore).filter_by(username=username2).first()
+    scores1 = Userscore.query.filter_by(username=username).first()
+    scores2 = Userscore.query.filter_by(username=username2).first()
     if winner == 1:
         scores1.Wins = scores1.Wins + 1
         scores2.Loses = scores2.Loses + 1
@@ -102,20 +104,24 @@ def updatescores():
 @app.route("/gamemaster/starttictactoe", methods=["GET"])
 def starttictactoe():
     username = request.json['username']
-    if db.session.query(Userscore).filter_by(username=username).first() is not None:
+    if Userscore.query.filter_by(username=username).first() is not None:
         if len(db.session.query(Queue).all()) >= 1:
             username2 = db.session.query(Queue).first()
             now = datetime.now()
             dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
             data = {}
-            data['gameid'] = username+"_"+username2+"_"+dt_string
+            gameid = username+"_"+username2.username+"_"+dt_string
+            data['gameid'] = gameid
             #json.dumps(data)
-            initgamestate = requests.post("http://playmaster:5001/playmaster/initstate", json={"gameid": data['gameid'], "player1": username, "player2": username2})
+            initgamestate = requests.post("http://playmaster:5001/playmaster/initstate", json={"gameid": gameid, "player1": username, "player2": username2.username})
             db.session.delete(username2)
             db.session.commit()
             return jsonify(data)
         else:
-            db.session.add(username)
+            queue = Queue(
+                username=username,
+            )
+            db.session.add(queue)
             db.session.commit()
             return Response("waitting in queue", status = 200)
     else:
@@ -124,21 +130,31 @@ def starttictactoe():
 @app.route("/gamemaster/starttictourn", methods=["GET"])
 def starttictourn():
     username = request.json['username']
-    if db.session.query(Userscore).filter_by(username=username).first() is not None:
-        db.session.add(username)
+    if Userscore.query.filter_by(username=username).first() is not None:
+        queuetour = Queuetournament(
+            username=username,
+        )
+        db.session.add(queuetour)
         db.session.commit()
         if len(db.session.query(Queue).all()) >= 8:
             for i in range(0, 4):
-                username2 = db.session.query(Queue).first()
+                username2 = Queue.query.first()
                 db.session.delete(username2)
-                username = db.session.query(Queue).first()
+                username = Queue.query.first()
                 db.session.delete(username)
                 now = datetime.now()
                 dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
                 data = {}
-                data['gameid'] = username+"_"+username2+"_"+dt_string
-                initgamestate = requests.post("http://playmaster:5001/playmaster/initstate",json={"gameid": data['gameid'], "player1": username, "player2": username2})
+                gameid = username.username+"_"+username2.username+"_"+dt_string
+                data['gameid'] = gameid
+                initgamestate = requests.post("http://playmaster:5001/playmaster/initstate", json={"gameid": gameid, "player1": username.username, "player2": username2.username})
                 #json.dumps(data)
+                tournament = Tournament(
+                    player1=username.username,
+                    player2=username2.username,
+                    gameid=gameid
+                )
+                db.session.add(tournament)
                 db.session.commit()
             return jsonify(data)
         else:
