@@ -12,14 +12,25 @@ services:
     auth-db:
         image: postgres:latest
         env_file: ./auth/postgres.env
-    #nginx:
-    #    build: ./nginx
-    #    image: nginx:latest
-    #    ports:
-    #        - 80:80
-    #client:
-    #    build: ./client
-    #    image: client:latest
+    nginx:
+        build: ./nginx
+        image: nginx:latest
+        ports:
+           - 80:80
+        depends_on: 
+            - auth
+            - client
+    client:
+        build: ./client
+        image: client:latest
+        ports:
+            - 3000:3000
+        environment:
+            - NODE_ENV=development
+            - REACT_APP_SERVICE_URL=http://localhost:80
+            - CHOKIDAR_USEPOLLING=true
+        depends_on: 
+            - auth
     playmaster:
         build: ./playmaster
         image: playmaster:latest

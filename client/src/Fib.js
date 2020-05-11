@@ -1,3 +1,6 @@
+// Use this file only as reference and delete before production.
+
+
 import React, { Component } from 'react';
 import axios from 'axios';
 
