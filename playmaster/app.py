@@ -19,9 +19,7 @@ def setstate():
 @app.route("/playmaster/getstate", methods=["GET"])
 def getstate():
     gameid = request.json['gameid']
-    #gameid = json.loads(gameid)
-    value = json.loads(r.get(str(gameid)))
-    return str(value)
+    return r.get(str(gameid)) # thats right i think
 
 @app.route("/playmaster/initstate", methods=["POST"])
 def initstate():
