@@ -10,3 +10,14 @@ Installation via docker-compose.
 sudo docker-compose up --build
 ```
 
+## Nginx Frond-End
+
+http://localhost:80/
+
+## Tasks
+
+-[x] user register
+-[x] user login
+-[x] basic- ui and home
+-[ ] token generation
+-[ ] private routes
