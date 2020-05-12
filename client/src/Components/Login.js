@@ -11,7 +11,7 @@ class Login extends Component {
     };
     this.handleChange = this.handleChange.bind(this);
   }
-    
+
   handleChange (event) {
     // check it out: we get the event.target.name (which will be either "username" or "password")
     // and use it to target the key on our `state` object with the same name, using bracket syntax
@@ -34,18 +34,18 @@ class Login extends Component {
       });
     this.setState({ username: '' , password: '' });
   }
-    
 
 
-    
+
+
   render () {
     return (
       <form onSubmit={this.handleSubmit}>
-      
+
         <label>Username</label>
         <input type="text" name="username" onChange={this.handleChange} />
         <br/>
-        <label>Password</label> 
+        <label>Password</label>
         <input type="password" name="password" onChange={this.handleChange} />
         <br/>
         <button>Submit</button>

@@ -20,6 +20,7 @@ export default class Home extends Component {
           </ul>
           <p><Link to="/signup">Sign Up</Link> Now!.</p>
           <p> Or <Link to="/login">Login</Link> instead!</p>
+          //<p> Play ,who gives a fuck about accounts <Link to="/Tictactoe">Tictactoe</Link> instead!</p>
         </Segment>
       </Container>
     );

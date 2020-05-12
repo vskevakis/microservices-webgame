@@ -28,7 +28,7 @@ def initstate():
     player2 = request.json['player2']
     #gameid = json.loads(gamedate)
     data = {}
-    init_state = [gameid, player1, player2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0] #last 3 are turn ,winner ,gamefinished
+    init_state = [gameid, player1, player2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0] #last3) 12 are turn ,13 winner ,14 gameactive
     data['state'] = init_state
     r.set(gameid, json.dumps(data))
     return Response("correct init"+str(gameid), status=200)

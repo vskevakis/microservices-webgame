@@ -17,7 +17,7 @@ services:
         image: nginx:latest
         ports:
            - 80:80
-        depends_on: 
+        depends_on:
             - auth
             - client
     client:
@@ -29,7 +29,7 @@ services:
             - NODE_ENV=development
             - REACT_APP_SERVICE_URL=http://localhost:80
             - CHOKIDAR_USEPOLLING=true
-        depends_on: 
+        depends_on:
             - auth
     playmaster:
         build: ./playmaster
