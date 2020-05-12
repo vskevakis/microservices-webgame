@@ -1,3 +1,5 @@
+// This is not used for the time being
+
 import React, { Component } from 'react'
 import { Menu, Container } from 'semantic-ui-react'
 // import { Subscribe } from 'unstated'

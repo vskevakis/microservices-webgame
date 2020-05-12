@@ -10,7 +10,7 @@ import Login from './Login'
 const Routes = () => (
     <Switch>
       <Route exact path="/" component={Home} />
-      <Route exact path="/signup" component={Register} />
+      <Route exact path="/register" component={Register} />
       <Route exact path="/login" component={Login} />
       {/* <Route exact path="/login" render={(props) => 
         <Subscribe to={[UserContainer]}>

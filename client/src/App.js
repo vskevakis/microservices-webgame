@@ -6,7 +6,7 @@ import './App.css';
 import { BrowserRouter as Router } from 'react-router-dom';
 
 
-import Nav from './Components/Nav'
+import NavBar from './Components/Navbar'
 import Routes from './Components/Routes'
 // import Login from './Components/Login';
 // import Register from './Components/Register';
@@ -18,7 +18,7 @@ class App extends Component {
       // <Provider inject={[UserContainer]}>
         <Router>
           <div className="wrapper">
-            <Nav/>
+            <NavBar/>
             <Routes/>
           </div>
         </Router>
