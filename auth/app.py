@@ -3,7 +3,6 @@ import requests
 from flask import Flask, jsonify, Response, request
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
-
 #Initialize Application 
 app = Flask(__name__)
 
@@ -68,7 +67,7 @@ def register():
         initscoredb = requests.post("http://gamemaster:5002/gamemaster/initdb", json={"username": username})
         return Response("User created with great success"+str(initscoredb), status = 200)
 
-@app.route("/auth/login", methods = ["GET"])
+@app.route("/auth/login", methods = ["POST"])
 def login():
     username = request.json['username']
     password = request.json['password']
@@ -81,7 +80,6 @@ def login():
         error = 'Password is incorrect'
         return Response(error, status = 400)
     return Response('User Authenticated with GREAT SUCCESS', status = 200)
-
 
 if __name__ == "__main__":
     app.run(debug=False)
