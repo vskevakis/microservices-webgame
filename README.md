@@ -16,8 +16,10 @@ http://localhost:80/
 
 ## Tasks
 
--[x] user register
--[x] user login
--[x] basic- ui and home
--[ ] token generation
--[ ] private routes
+- [x] user register
+- [x] user login
+- [x] basic- ui and home
+- [x] token generation
+- [x] private routes
+- [ ] gameserver
+- [ ] play games
