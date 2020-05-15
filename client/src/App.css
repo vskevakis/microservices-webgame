@@ -22,7 +22,19 @@
   font-size: large;
 }
 
+.Square {
+  background-color: black;
+  border: 3px solid white;
+  font-size: 80px;
+  color: #ffffff;
+  border-radius: 10px 10px 10px 10px;
+}
+
 @keyframes App-logo-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }

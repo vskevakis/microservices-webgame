@@ -1,84 +1,106 @@
-import React, { Component } from 'react';
-import axios from 'axios';
+import React, { Component } from "react";
+import { Button, Row, Container, Col } from "react-bootstrap";
+
+import axios from "axios";
+import { checkCookie } from "../Authentication/cookies";
+
+function Square(props) {
+  return <Button size="lg" variant="dark" class="Square"></Button>;
+}
 
 class Tictactoe extends Component {
-
-  const winningConditions = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6]
-  ];
-  state = {
-    data: []
+  constructor(props) {
+    super(props);
+    this.state = {
+      username: checkCookie(),
+      game_id: "",
+      game_state: [],
+    };
+    // this.handleChange = this.handleChange.bind(this);
   }
 
-  handleChange (event) {
-    // check it out: we get the event.target.name (which will be either "username" or "password")
-    // and use it to target the key on our `state` object with the same name, using bracket syntax
-    this.setState({ [event.target.name]: event.target.value });
+  componentDidMount() {
+    var self = this;
+    // this.socket = io.connect(location.protocol + '//' + document.domain + ':' +  location.port + '/playmaster');
+    this.socket = io.connect("http://localhost:80/playmaster");
+    this.socket.on("connect", function () {
+      self.socket.emit("hi", {
+        game_id: this.props.game_id,
+        username: this.props.username,
+      });
+    });
+
+    self.socket.emit("set_state", { game_id: this.props.game_id });
   }
 
-  handleSubmit = async event => {
+  handleSubmit = async (event) => {
     event.preventDefault();
 
+    // var socket = io.connect('http://localhost:80/playmaster/' + document.domain + ':' + location.port + '/test');
+
     const user_data = {
-      username: this.state.username,
-      password: this.state.password
-    }
-    await axios.post('http://localhost:80/gamemaster/starttictactoe', user_data
-    ).then((response) => {
-        alert('Authentication is Successful. Welcome to F-Society, ' + user_data.username);
-      }, (error) => {
-        alert('Authentication Unsuccesful. Please check your credentials.');
-      });
-    this.setState({ username: '' , password: '' });
+      username: "",
+    };
+    this.setState({ username: checkCookie() });
+    await axios
+      .post("http://localhost:80/gamemaster/starttictactoe", user_data)
+      .then(
+        (response) => {
+          this.setState({ game_id: JSON.stringify(response.data) });
+          alert("Game ID: ", this.game_id);
+        },
+        (error) => {
+          alert("gamemaster/StartTicTacToe Error");
+        }
+      );
+    // this.setState({ username: "", password: "" });
+
+    const game_id = {
+      gameid: this.state.game_id,
+    };
+
+    await axios.post("http://localhost:80/playmaster/getstate", game_id).then(
+      (response) => {
+        this.setState({ game_state: JSON.stringify(response.data) });
+        alert("Game Found! Game State: ", this.state.game_state);
+      },
+      (error) => {
+        alert("playmaster/Error");
+      }
+    );
+  };
+
+  renderSquare(i) {
+    return (
+      <Square
+      // value={this.props.squares[i]}
+      // onClick={() => this.props.onClick(i)}
+      />
+    );
   }
-
-
-
 
   render() {
-    var status;
-    if (this.state.data === 3) {
-      status = 'Tie Game';
-    } else if(this.state.winner)
-      status = 'Game over, ' + this.state.winner + ' wins the game!';
-    else if(this.state.symbol !== this.state.turnSymbol) {
-      status = 'Waiting for ' + this.state.turnSymbol + ' to move ...';
-    } else {
-      status = 'It\'s your turn to move, ' + this.state.turnSymbol;
-    }
     return (
-      <div className="centered">
-        <div className="status">{status}</div>
-        <div className="game-board">
-          <div className="box">{this.renderSquare(0)}</div>
-          <div className="box">{this.renderSquare(1)}</div>
-          <div className="box">{this.renderSquare(2)}</div>
-          <div className="box">{this.renderSquare(3)}</div>
-          <div className="box">{this.renderSquare(4)}</div>
-          <div className="box">{this.renderSquare(5)}</div>
-          <div className="box">{this.renderSquare(6)}</div>
-          <div className="box">{this.renderSquare(7)}</div>
-          <div className="box">{this.renderSquare(8)}</div>
-      </div>
-        <br />
-        <div className="status">
-          <button onClick={this.resetGame}>Reset Game</button>
-        </div>
-      </div>
+      <Container fluid>
+        <Row className="justify-content-md-center">
+          <Col xl="auto">{this.renderSquare(0)}</Col>
+          <Col xl="auto">{this.renderSquare(1)}</Col>
+          <Col xl="auto">{this.renderSquare(2)}</Col>
+        </Row>
+        <Row className="justify-content-md-center">
+          <Col xl="auto">{this.renderSquare(3)}</Col>
+          <Col xl="auto">{this.renderSquare(4)}</Col>
+          <Col xl="auto">{this.renderSquare(5)}</Col>
+        </Row>
+        <Row className="justify-content-md-center">
+          <Col xl="auto">{this.renderSquare(6)}</Col>
+          <Col xl="auto">{this.renderSquare(7)}</Col>
+          <Col xl="auto">{this.renderSquare(8)}</Col>
+        </Row>
+        <Button onClick={this.handleSubmit}>PLAY!</Button>
+      </Container>
     );
-
   }
-
-
-  }
+}
 
 export default Tictactoe;
-
-// We can add Register Class Here

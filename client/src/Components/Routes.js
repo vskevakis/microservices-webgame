@@ -7,6 +7,7 @@ import Home from "./Home";
 import Register from "./Register";
 import Login from "./Login";
 import Dashboard from "./Dashboard";
+import Tictactoe from "./Tictactoe";
 
 const Routes = () => (
   <Switch>
@@ -14,7 +15,7 @@ const Routes = () => (
     <Route exact path="/register" component={Register} />
     <Route exact path="/login" component={Login} />
     <PrivateRoute path="/dashboard" component={Dashboard} />
-    <PrivateRoute path="/tictactoe" component={Dashboard} />
+    <Route path="/tictactoe" component={Tictactoe} />
   </Switch>
 );
 

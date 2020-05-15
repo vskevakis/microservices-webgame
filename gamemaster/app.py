@@ -1,3 +1,5 @@
+# from app import Userscore, Queue, Queuetournament, Tournament
+
 import os
 import requests
 from flask import Flask, jsonify, Response, request
@@ -7,6 +9,7 @@ from datetime import datetime
 
 # Initialize Application
 app = Flask(__name__)
+
 
 # Configuration of postgreSQL Database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://{user}:{password}@{host}:{port}/{db}'.format(
@@ -26,7 +29,8 @@ db = SQLAlchemy(app)
 class Userscore(db.Model):
     __tablename__ = "userscore"
     # user_id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(255), unique=True, nullable=False, primary_key=True)
+    username = db.Column(db.String(255), unique=True,
+                         nullable=False, primary_key=True)
     Wins = db.Column(db.Integer)
     Ties = db.Column(db.Integer)
     Loses = db.Column(db.Integer)
@@ -34,13 +38,22 @@ class Userscore(db.Model):
     def json(self):
         return {"username": self.username, "Wins": self.Wins, "Ties": self.Ties, "Loses": self.Loses}
 
+
 class Queue(db.Model):
     __tablename__ = "queue"
-    username = db.Column(db.String(255), unique=True, nullable=False, primary_key=True)
+    gameid = db.Column(db.String(255), unique=True,
+                       nullable=False, primary_key=True)
+    # username = db.Column(db.String(255), unique=True,
+    #                      nullable=False, primary_key=True)
+
 
 class Queuetournament(db.Model):
     __tablename__ = "queuetournament"
-    username = db.Column(db.String(255), unique=True, nullable=False, primary_key=True)
+    gameid = db.Column(db.String(255), unique=True,
+                       nullable=False, primary_key=True)
+    # username = db.Column(db.String(255), unique=True,
+    #                      nullable=False, primary_key=True)
+
 
 class Tournament(db.Model):
     __tablename__ = "tournament"
@@ -49,14 +62,15 @@ class Tournament(db.Model):
     winner = db.Column(db.String(255))
     gameid = db.Column(db.String(255), primary_key=True)
 
+
 # Create Database Table and Model
 db.create_all()
 db.session.commit()
-from app import Userscore, Queue ,Queuetournament ,Tournament
+
 
 # CreateUser API
-@app.route("/gamemaster/initdb", methods=["POST"])
-def initdb():
+@app.route("/gamemaster/createUser", methods=["POST"])
+def createUser():
     username = request.json['username']
 
     userscore = Userscore(
@@ -79,7 +93,8 @@ def getscores():
     return jsonify(scores.json())
 
 
-@app.route("/gamemaster/updatescores", methods=["POST"])  #winner is : 1) for player1 win,2) for player2 win,else tie
+# winner is : 1) for player1 win,2) for player2 win,else tie
+@app.route("/gamemaster/updatescores", methods=["POST"])
 def updatescores():
     username = request.json['player1']
     username2 = request.json['player2']
@@ -101,31 +116,39 @@ def updatescores():
     db.session.commit()
     return Response("Userscoredb updated with great success", status=200)
 
-@app.route("/gamemaster/starttictactoe", methods=["GET"])
+
+@app.route("/gamemaster/starttictactoe", methods=["POST"])
 def starttictactoe():
     username = request.json['username']
     if Userscore.query.filter_by(username=username).first() is not None:
         if len(db.session.query(Queue).all()) >= 1:
-            username2 = db.session.query(Queue).first()
-            now = datetime.now()
-            dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+            queue = db.session.query(Queue).first()
             data = {}
-            gameid = username+"_"+username2.username+"_"+dt_string
-            data['gameid'] = gameid
-            #json.dumps(data)
-            initgamestate = requests.post("http://playmaster:5001/playmaster/initstate", json={"gameid": gameid, "player1": username, "player2": username2.username})
-            db.session.delete(username2)
+            data['gameid'] = queue.gameid
+            # start_game = requests.post("http://playmaster:5001/playmaster/startGame",
+            #                            json={"gameid": queue.gameid})
+            initgamestate = requests.post("http://playmaster:5001/playmaster/initstate",
+                                          json={"gameid": queue.gameid, "game_owner": username})
+            db.session.delete(queue)
             db.session.commit()
             return jsonify(data)
         else:
+            now = datetime.now()
+            dt_string = now.strftime("%d/%m/%Y %H:%M:%S.%f")[:-3]
+            gameid = "tictactoe"+"_"+dt_string
+            data = {}
+            data['gameid'] = gameid
+            # initgamestate = requests.post("http://playmaster:5001/playmaster/initstate",
+            #                               json={"gameid": gameid, "game_owner": username})
             queue = Queue(
-                username=username,
+                gameid=gameid
             )
             db.session.add(queue)
             db.session.commit()
-            return Response("waitting in queue", status = 200)
+            return jsonify(data)
     else:
-        return Response("error: name not found", status = 400)
+        return Response("error: name not found", status=400)
+
 
 @app.route("/gamemaster/starttictourn", methods=["GET"])
 def starttictourn():
@@ -147,8 +170,9 @@ def starttictourn():
                 data = {}
                 gameid = username.username+"_"+username2.username+"_"+dt_string
                 data['gameid'] = gameid
-                initgamestate = requests.post("http://playmaster:5001/playmaster/initstate", json={"gameid": gameid, "player1": username.username, "player2": username2.username})
-                #json.dumps(data)
+                initgamestate = requests.post("http://playmaster:5001/playmaster/initstate", json={
+                                              "gameid": gameid, "player1": username.username, "player2": username2.username})
+                # json.dumps(data)
                 tournament = Tournament(
                     player1=username.username,
                     player2=username2.username,
@@ -158,9 +182,10 @@ def starttictourn():
                 db.session.commit()
             return jsonify(data)
         else:
-            return Response("waitting in queue", status = 200)
+            return Response("waitting in queue", status=200)
     else:
-        return Response("error: name not found", status = 400)
+        return Response("error: name not found", status=400)
+
 
 if __name__ == "__main__":
     app.run(debug=False)
