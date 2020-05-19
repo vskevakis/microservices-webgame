@@ -6,8 +6,13 @@ import { checkCookie } from "../Authentication/cookies";
 
 const socket = io.connect();
 
+//function Square(props) {
+//  return <Button size="lg" variant="dark" class="Square"></Button>;
+//}
 function Square(props) {
-  return <Button size="lg" variant="dark" class="Square"></Button>;
+  return (
+    <button className="gamesquare" onClick={props.onClick}>{props.value}</button>
+  );
 }
 
 class Tictactoe extends Component {
@@ -18,7 +23,7 @@ class Tictactoe extends Component {
       game_id: "",
       player1: "",
       player2: "",
-      state: [],
+      board: [],
       turn: "",
       active: "",
       winner: "",
@@ -26,11 +31,57 @@ class Tictactoe extends Component {
     // this.handleChange = this.handleChange.bind(this);
   }
 
-  handleMove() {
+  handleMove(i) {
     // socket.emit("set_state", function (game_info) {
     //   game_info = this.state;
     // });
+    socket.emit("get_state2", function (game_id) {
+      game_id = this.state.game_id;
+    });    
+    console.log("handle move1",i,this.state.board[i]);
+    if(this.state.board[i] !== null || this.state.active!== 1 || this.state.username !== this.state.turn) {
+      return;
+    }
     console.log("handle move");
+    //if (this.state.username !== this.state.player1){ 
+      //his.state.state[i]='X';
+      //setState(state.state)=>{state : []};}
+      this.setState(state => {
+      const board = state.board.map((item, j) => {
+        if (j === i && this.state.username !== this.state.player1) {
+          return 'X';
+        }else if(j === i && this.state.username !== this.state.player2){
+          return 'O';
+        } 
+        else {
+          return null;
+        }
+      });
+      return {
+        board,
+      };
+      });
+    //}
+    //else{
+      //this.state.state[i]='O';
+      //setState(state.state[i] = 'O');
+    //  this.setState(state => {
+     //   const state = state.state.map((item, j) => {
+     //     if (j === i) {
+     //       return 'O';
+     //     } else {
+     //       return null;
+     //     }
+     //   });
+     //   return {
+     ///     state,
+     //   };
+     // });
+      //this.setState({ game_id: JSON.stringify(response.data) });
+    //}
+    socket.emit("set_state", function (game_info) {
+      game_info = this.state;
+    });    
   }
 
   componentDidMount() {
@@ -42,9 +93,9 @@ class Tictactoe extends Component {
     socket.on("playing", function () {
       console.log("Playing");
       // this.handleMove();
-      socket.emit("set_state", function (game_info) {
-        game_info = this.state;
-      });
+      //socket.emit("set_state", function (game_info) {
+      //  game_info = this.state;
+      //});
     });
     socket.on("waiting", function () {
       console.log("Waiting");
@@ -87,10 +138,11 @@ class Tictactoe extends Component {
   };
 
   renderSquare(i) {
+    console.log("rendersquare",i)
     return (
       <Square
-      // value={this.props.squares[i]}
-      // onClick={() => this.props.onClick(i)}
+        value={this.state.board[i]}
+        onClick={() => this.handleMove(i)}
       />
     );
   }
