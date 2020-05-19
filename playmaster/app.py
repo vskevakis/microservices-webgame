@@ -29,7 +29,7 @@ def start_handler(data):
                 'player1': game_state['player1'],
                 'player2': username,
                 'state': game_state['state'],
-                'turn': game_state['turn'],
+                'turn': username,
                 'active': 1,
                 'winner': game_state['winner']
             }
@@ -40,7 +40,7 @@ def start_handler(data):
             'player1': username,
             'player2': 'not yet',
             'state': [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            'turn': 'x',
+            'turn': 'not yet',
             'active': 0,
             'winner': 0
         }
@@ -51,15 +51,15 @@ def start_handler(data):
 @socketio.on('get_state')
 def game_handler(data):
     game_id = data['game_id']
-    game = r.get(game_id)
-    emit('response get_state', game)  # this propably ok
+    game_info = json.loads(r.get(game_id))
+    emit('response get_state', game_info)  # this propably ok
 
 
 @socketio.on('set_state')
 def set_state(data):
     state = {
         'game_id': data['game_id'],
-        'player1': data['y'],
+        'player1': data['player1'],
         'player2': data['player2'],
         'state': data['state'],
         'turn': data['turn'],
@@ -67,6 +67,7 @@ def set_state(data):
         'winner': data['winner']
     }
     r.set(str(data['game_id']), json.dumps(state))
+    emit('waiting')
 
 
 if __name__ == "__main__":

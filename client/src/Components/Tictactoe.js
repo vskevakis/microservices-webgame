@@ -4,10 +4,11 @@ import io from "socket.io-client";
 import axios from "axios";
 import { checkCookie } from "../Authentication/cookies";
 
+const socket = io.connect();
+
 function Square(props) {
   return <Button size="lg" variant="dark" class="Square"></Button>;
 }
-const socket = io.connect();
 
 class Tictactoe extends Component {
   constructor(props) {
@@ -15,9 +16,21 @@ class Tictactoe extends Component {
     this.state = {
       username: "",
       game_id: "",
-      game_state: [],
+      player1: "",
+      player2: "",
+      state: [],
+      turn: "",
+      active: "",
+      winner: "",
     };
     // this.handleChange = this.handleChange.bind(this);
+  }
+
+  handleMove() {
+    // socket.emit("set_state", function (game_info) {
+    //   game_info = this.state;
+    // });
+    console.log("handle move");
   }
 
   componentDidMount() {
@@ -28,12 +41,29 @@ class Tictactoe extends Component {
     });
     socket.on("playing", function () {
       console.log("Playing");
+      // this.handleMove();
+      socket.emit("set_state", function (game_info) {
+        game_info = this.state;
+      });
     });
     socket.on("waiting", function () {
       console.log("Waiting");
-    });
-    socket.on("my_error", function (data) {
-      console.log("My_Error", data);
+      socket.emit("get_state", function (game_id) {
+        game_id = this.state.game_id;
+      });
+      socket.on("response get_state", function (game_info) {
+        if (game_info.turn === this.state.username) {
+          // this.handleMove();
+          socket.emit("set_state", function (game_info) {
+            game_info = this.state;
+          });
+        }
+        setTimeout(function () {
+          return socket.emit("get_state", function (game_id) {
+            game_id = this.state.game_id;
+          });
+        }, 1000);
+      });
     });
   }
 

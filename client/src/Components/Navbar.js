@@ -29,6 +29,9 @@ class NavBar extends Component {
               <Nav.Link style={{ color: "#5299d3" }} href="/dashboard">
                 Dashboard
               </Nav.Link>
+              <Nav.Link style={{ color: "#5299d3" }} href="/tictactoe">
+                Tictactoe
+              </Nav.Link>
             </Nav>
           </Navbar.Collapse>
         </Navbar>
