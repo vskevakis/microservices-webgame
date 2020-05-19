@@ -23,3 +23,17 @@ http://localhost:80/
 - [x] private routes
 - [ ] gameserver
 - [ ] play games
+
+## Docker cheatsheet
+
+Remove all docker images
+
+```bash
+sudo docker rmi $(docker images -a -q)
+```
+
+Remove all exited containers
+
+```bash
+sudo docker rm $(docker ps -a -f status=exited -q)
+```

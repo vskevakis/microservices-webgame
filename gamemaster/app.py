@@ -127,8 +127,8 @@ def starttictactoe():
             data['gameid'] = queue.gameid
             # start_game = requests.post("http://playmaster:5001/playmaster/startGame",
             #                            json={"gameid": queue.gameid})
-            initgamestate = requests.post("http://playmaster:5001/playmaster/initstate",
-                                          json={"gameid": queue.gameid, "game_owner": username})
+            # initgamestate = requests.post("http://playmaster:5001/playmaster/initstate",
+            #   json={"gameid": queue.gameid, "game_owner": username})
             db.session.delete(queue)
             db.session.commit()
             return jsonify(data)
@@ -147,7 +147,7 @@ def starttictactoe():
             db.session.commit()
             return jsonify(data)
     else:
-        return Response("error: name not found", status=400)
+        return Response("error: name not found", status=401)
 
 
 @app.route("/gamemaster/starttictourn", methods=["GET"])

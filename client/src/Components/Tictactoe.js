@@ -1,18 +1,19 @@
 import React, { Component } from "react";
 import { Button, Row, Container, Col } from "react-bootstrap";
-
+import io from "socket.io-client";
 import axios from "axios";
 import { checkCookie } from "../Authentication/cookies";
 
 function Square(props) {
   return <Button size="lg" variant="dark" class="Square"></Button>;
 }
+const socket = io.connect();
 
 class Tictactoe extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      username: checkCookie(),
+      username: "",
       game_id: "",
       game_state: [],
     };
@@ -20,54 +21,39 @@ class Tictactoe extends Component {
   }
 
   componentDidMount() {
-    var self = this;
-    // this.socket = io.connect(location.protocol + '//' + document.domain + ':' +  location.port + '/playmaster');
-    this.socket = io.connect("http://localhost:80/playmaster");
-    this.socket.on("connect", function () {
-      self.socket.emit("hi", {
-        game_id: this.props.game_id,
-        username: this.props.username,
-      });
-    });
+    this.setState({ username: checkCookie() });
 
-    self.socket.emit("set_state", { game_id: this.props.game_id });
+    socket.on("error", function (err) {
+      console.log("Error: ", err);
+    });
+    socket.on("playing", function () {
+      console.log("Playing");
+    });
+    socket.on("waiting", function () {
+      console.log("Waiting");
+    });
+    socket.on("my_error", function (data) {
+      console.log("My_Error", data);
+    });
   }
 
   handleSubmit = async (event) => {
-    event.preventDefault();
-
-    // var socket = io.connect('http://localhost:80/playmaster/' + document.domain + ':' + location.port + '/test');
-
-    const user_data = {
-      username: "",
-    };
-    this.setState({ username: checkCookie() });
     await axios
-      .post("http://localhost:80/gamemaster/starttictactoe", user_data)
+      .post("http://localhost:80/gamemaster/starttictactoe", this.state)
       .then(
         (response) => {
           this.setState({ game_id: JSON.stringify(response.data) });
-          alert("Game ID: ", this.game_id);
+          console.log("Game ID: ", this.state.game_id);
         },
         (error) => {
-          alert("gamemaster/StartTicTacToe Error");
+          console.log("gamemaster/StartTicTacToe Error", error);
         }
       );
-    // this.setState({ username: "", password: "" });
-
-    const game_id = {
-      gameid: this.state.game_id,
-    };
-
-    await axios.post("http://localhost:80/playmaster/getstate", game_id).then(
-      (response) => {
-        this.setState({ game_state: JSON.stringify(response.data) });
-        alert("Game Found! Game State: ", this.state.game_state);
-      },
-      (error) => {
-        alert("playmaster/Error");
-      }
-    );
+    console.log("username: ", this.state.username, this.state.game_id);
+    socket.emit("start", {
+      username: this.state.username,
+      game_id: this.state.game_id,
+    });
   };
 
   renderSquare(i) {

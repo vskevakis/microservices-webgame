@@ -35,7 +35,7 @@ class Login extends Component {
           "Authentication is Successful. Welcome to F-Society, " +
             user_data.username
         );
-        setCookie("token", user_data.username, 0.05);
+        setCookie("token", user_data.username, 1);
         this.setState({ isAuthenticated: true });
       },
       (error) => {

@@ -12,4 +12,4 @@ COPY . .
 
 EXPOSE 5001
 
-CMD gunicorn -b 0.0.0.0:5001 app:app
+CMD gunicorn -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker -w 1 app:app -b 0.0.0.0:5001
