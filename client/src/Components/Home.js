@@ -18,7 +18,7 @@ export default class Home extends Component {
             <li>User Login</li>
             <li>Some backend boring stuff</li>
           </ul>
-          <p><Link to="/signup">Sign Up</Link> Now!.</p>
+          <p><Link to="/register">Sign Up</Link> Now!.</p>
           <p> Or <Link to="/login">Login</Link> instead!</p>
           //<p> Play ,who gives a fuck about accounts <Link to="/Tictactoe">Tictactoe</Link> instead!</p>
         </Segment>
