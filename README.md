@@ -34,11 +34,11 @@ http://localhost:80/
 Remove all docker images
 
 ```bash
-sudo docker rmi $(docker images -a -q)
+docker rmi $(docker images -a -q)
 ```
 
 Remove all exited containers
 
 ```bash
-sudo docker rm $(docker ps -a -f status=exited -q)
+docker rm $(docker ps -a -f status=exited -q)
 ```

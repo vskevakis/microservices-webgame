@@ -33,10 +33,6 @@ class Login extends Component {
 
     await axios.post("http://localhost:80/auth/login", user_data).then(
       (response) => {
-        alert(
-          "Authentication is Successful. Welcome to F-Society, " +
-            user_data.username
-        );
         setCookie("token", user_data.username, 1);
         this.setState({ isAuthenticated: true });
       },
@@ -77,12 +73,6 @@ class Login extends Component {
             name="password"
             placeholder="Password"
             onChange={this.handleChange}
-          />
-        </Form.Group>
-        <Form.Group controlId="formBasicCheckbox">
-          <Form.Check
-            type="checkbox"
-            label="I accept usage of cookies for authentication purposes only."
           />
         </Form.Group>
         <Form.Row>

@@ -17,8 +17,9 @@ class DashboardPage extends Component {
           <Col></Col>
           <Col md="auto">
             <h4>
-              Hello {this.state.username}, this is the dashboard and we will
-              display user stats and options
+              Welcome {this.state.username}! This is the dashboard and we will
+              display your stats. Feel free to play Tic Tac Toe with your
+              online.
             </h4>
           </Col>
           <Col></Col>

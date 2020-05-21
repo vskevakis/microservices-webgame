@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React from "react";
 import { Button, Row, Container, Col, Spinner } from "react-bootstrap";
 import io from "socket.io-client";
 import axios from "axios";
@@ -6,9 +6,6 @@ import { checkCookie } from "../Authentication/cookies";
 
 const socket = io.connect();
 
-//function Square(props) {
-//  return <Button size="lg" variant="dark" class="Square"></Button>;
-//}
 function Square(props) {
   return (
     <button className="gamesquare" onClick={props.onClick}>
@@ -178,9 +175,17 @@ class Tictactoe extends React.Component {
         if (game_info.winner === "3") {
           alert("It's a tie");
         } else if (game_info.winner === "2") {
-          alert("Player 2 won :" + game_info.player2);
+          if (game_info.player2 === that.state.username) {
+            alert("You won!");
+          } else {
+            alert("Sorry, you lost!");
+          }
         } else {
-          alert("Player 1 won :" + game_info.player1);
+          if (game_info.player1 === that.state.username) {
+            alert("You won!");
+          } else {
+            alert("Sorry, you lost!");
+          }
         }
       } else {
         socket.emit("get_state", {
