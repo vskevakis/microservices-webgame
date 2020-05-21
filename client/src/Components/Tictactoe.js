@@ -167,7 +167,7 @@ class Tictactoe extends React.Component {
     socket.on("response get_state", function (game_info) {
       if (game_info.turn === that.state.username && game_info.active !== "0") {
         that.setState((state) => ({ game_id: game_info.game_id }));
-        that.setState((state) => ({ game_type: data.game_type}));
+        that.setState((state) => ({ game_type: game_info.game_type}));
         that.setState((state) => ({ player1: game_info.player1 }));
         that.setState((state) => ({ player2: game_info.player2 }));
         that.setState((state) => ({ board: game_info.board }));
@@ -176,6 +176,7 @@ class Tictactoe extends React.Component {
         that.setState((state) => ({ winner: game_info.winner }));
         that.setState((state) => ({ waiting: false }));
       } else if (game_info.active === "0" && game_info.winner !== "0") {
+        that.btn.removeAttribute("disabled");
         if (game_info.winner === "3") {
           alert("It's a tie");
         } else if (game_info.winner === "2") {
@@ -219,6 +220,7 @@ class Tictactoe extends React.Component {
         game_type: "Tic_tac_toe"
       });
       this.setState((state) => ({ game_type:"Tic_tac_toe"}));
+      this.btn.setAttribute("disabled", "disabled");
     //console.log("username: ", this.state.username, this.state.game_id);
   };
 
@@ -256,7 +258,7 @@ class Tictactoe extends React.Component {
         <Row className="justify-content-md-center">{this.renderWaiting()}</Row>
         <Row className="justify-content-md-center playbtn">
           <Col className="justify-content-md-center">
-            <Button onClick={this.handleSubmit}>Play!</Button>
+            <Button ref={btn => { this.btn = btn; }}  onClick={this.handleSubmit}>Play!</Button>
           </Col>
           <Col className="justify-content-md-center">
             <Button href="./dashboard">Exit</Button>

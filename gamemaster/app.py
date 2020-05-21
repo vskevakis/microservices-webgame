@@ -34,31 +34,42 @@ class Userscore(db.Model):
     Wins = db.Column(db.Integer)
     Ties = db.Column(db.Integer)
     Loses = db.Column(db.Integer)
-    #Winschess = db.Column(db.Integer)
-    #Tieschess = db.Column(db.Integer)
-    #Loseschess = db.Column(db.Integer)
+    Winschess = db.Column(db.Integer)
+    Tieschess = db.Column(db.Integer)
+    Loseschess = db.Column(db.Integer)
 
     def json(self):
-        return {"username": self.username, "Wins": self.Wins, "Ties": self.Ties, "Loses": self.Loses }#, "Winschess": self.Winschess, "Tieschess": self.Tieschess, "Loseschess": self.Loseschess}
+        return {"username": self.username, "Wins": self.Wins, "Ties": self.Ties, "Loses": self.Loses , "Winschess": self.Winschess, "Tieschess": self.Tieschess, "Loseschess": self.Loseschess}
 
 
 class Queue(db.Model):
     __tablename__ = "queue"
     gameid = db.Column(db.String(255), unique=True,
                        nullable=False, primary_key=True)
-    # username = db.Column(db.String(255), unique=True,
-    #                      nullable=False, primary_key=True)
+    username = db.Column(db.String(255), unique=True,
+                          nullable=False)
 class Queue_Chess(db.Model):
     __tablename__ = "queue_Chess"
     gameid = db.Column(db.String(255), unique=True,
                        nullable=False, primary_key=True)
+    username = db.Column(db.String(255), unique=True,
+                         nullable=False, primary_key=True)
 
 class Queuetournament(db.Model):
     __tablename__ = "queuetournament"
     gameid = db.Column(db.String(255), unique=True,
                        nullable=False, primary_key=True)
-    # username = db.Column(db.String(255), unique=True,
-    #                      nullable=False, primary_key=True)
+    username = db.Column(db.String(255), unique=True,
+                         nullable=False, primary_key=True)
+
+class Playing(db.Model):
+    __tablename__ = "playing"
+    gameid = db.Column(db.String(255), unique=True,
+                       nullable=False, primary_key=True)
+    player1 = db.Column(db.String(255), unique=True,
+                          nullable=False)
+    player2 = db.Column(db.String(255), unique=True,
+                          nullable=False)
 
 
 class Tournament(db.Model):
@@ -131,6 +142,11 @@ def updatescores():
         else:
             scores1.Ties = scores1.Ties + 1
             scores2.Ties = scores2.Ties + 1
+    if Playing.query.filter_by(player1=username).first() is not None:
+        playing=Playing.query.filter_by(player1=username).first()
+    else:
+        playing=Playing.query.filter_by(player2=username).first()
+    db.session.delete(playing)
     db.session.add(scores1)
     db.session.add(scores2)
     db.session.commit()
@@ -141,24 +157,47 @@ def updatescores():
 def starttictactoe():
     username = request.json['username']
     if Userscore.query.filter_by(username=username).first() is not None:
-        if len(db.session.query(Queue).all()) >= 1:
-            queue = db.session.query(Queue).first()
+        if Playing.query.filter_by(player1=username).first() is not None:
+            playing = db.session.query(Playing).filter_by(player1=username).first()   
+            data = {}
+            data['gameid'] = playing.gameid
+            return jsonify(data)
+        if Playing.query.filter_by(player2=username).first() is not None:
+            playing = db.session.query(Playing).filter_by(player2=username).first()   
+            data = {}
+            data['gameid'] = playing.gameid
+            return jsonify(data)
+        if Queue.query.filter_by(username=username).first() is None:
+            if len(db.session.query(Queue).all()) >= 1:
+                queue = db.session.query(Queue).first()
+                data = {}
+                data['gameid'] = queue.gameid
+                playing = Playing(
+                    gameid=queue.gameid,
+                    player1=queue.username,
+                    player2=username
+                )
+                db.session.add(playing)
+                db.session.delete(queue)
+                db.session.commit()
+                return jsonify(data)
+            else:
+                now = datetime.now()
+                dt_string = now.strftime("%d/%m/%Y %H:%M:%S.%f")[:-3]
+                gameid = "Tic_tac_toe"+"_"+dt_string
+                data = {}
+                data['gameid'] = gameid
+                queue = Queue(
+                    gameid=gameid,
+                    username=username
+                )
+                db.session.add(queue)
+                db.session.commit()
+                return jsonify(data)
+        else:
+            queue=Queue.query.filter_by(username=username).first()
             data = {}
             data['gameid'] = queue.gameid
-            db.session.delete(queue)
-            db.session.commit()
-            return jsonify(data)
-        else:
-            now = datetime.now()
-            dt_string = now.strftime("%d/%m/%Y %H:%M:%S.%f")[:-3]
-            gameid = "Tic_tac_toe"+"_"+dt_string
-            data = {}
-            data['gameid'] = gameid
-            queue = Queue(
-                gameid=gameid
-            )
-            db.session.add(queue)
-            db.session.commit()
             return jsonify(data)
     else:
         return Response("error: name not found", status=401)
@@ -172,10 +211,7 @@ def start_Chess():
             queue_Chess = db.session.query(Queue_Chess).first()
             data = {}
             data['gameid'] = queue_Chess.gameid
-            # start_game = requests.post("http://playmaster:5001/playmaster/startGame",
-            #                            json={"gameid": queue.gameid})
-            # initgamestate = requests.post("http://playmaster:5001/playmaster/initstate",
-            #   json={"gameid": queue.gameid, "game_owner": username})
+
             db.session.delete(queue_Chess)
             db.session.commit()
             return jsonify(data)
@@ -185,8 +221,6 @@ def start_Chess():
             gameid = "Chess"+"_"+dt_string
             data = {}
             data['gameid'] = gameid
-            # initgamestate = requests.post("http://playmaster:5001/playmaster/initstate",
-            #                               json={"gameid": gameid, "game_owner": username})
             queue_Chess = Queue_Chess(
                 gameid=gameid
             )
@@ -195,44 +229,6 @@ def start_Chess():
             return jsonify(data)
     else:
         return Response("error: name not found", status=401)
-
-
-#@app.route("/gamemaster/starttictourn", methods=["GET"])
-#def starttictourn():
-#    username = request.json['username']
-#    username = request.json['username']
-#    if Userscore.query.filter_by(username=username).first() is not None:
-#        queuetour = Queuetournament(
-#            username=username,
-#        )
-#        db.session.add(queuetour)
-#        db.session.commit()
-#        if len(db.session.query(Queue).all()) >= 8:
-#            for i in range(0, 4):
-#                username2 = Queue.query.first()
-#                db.session.delete(username2)
-#                username = Queue.query.first()
-#                db.session.delete(username)
-#                now = datetime.now()
-#                dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
-#                data = {}
-#                gameid = username.username+"_"+username2.username+"_"+dt_string
-#                data['gameid'] = gameid
-#                initgamestate = requests.post("http://playmaster:5001/playmaster/initstate", json={
-#                                              "gameid": gameid, "player1": username.username, "player2": username2.username})
-#                # json.dumps(data)
-#                tournament = Tournament(
-#                    player1=username.username,
-#                    player2=username2.username,
-#                    gameid=gameid
-#                )
-#                db.session.add(tournament)
-#                db.session.commit()
-#            return jsonify(data)
-#        else:
-#            return Response("waitting in queue", status=200)
-#    else:
-#        return Response("error: name not found", status=400)
 
 
 if __name__ == "__main__":

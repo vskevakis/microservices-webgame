@@ -56,7 +56,7 @@ def start_handler(data):
             'game_type': "Chess",
             'player1': username,
             'player2': 'not yet',
-            'board': [None, None, None, None, None, None, None, None, None],
+            'board': 'start',
             'turn': 'not yet',
             'active': "0",
             'winner': "0"
