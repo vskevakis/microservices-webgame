@@ -2,6 +2,9 @@
 
 Microservices multiplayer webgame for Distributed Systems course TUC
 
+![Login Page](https://i.imgur.com/39cK5wt.png)
+![Tic Tac Toe Game](https://i.imgur.com/pCzML4B.png)
+
 ## Installation
 
 Installation via docker-compose.
@@ -10,19 +13,21 @@ Installation via docker-compose.
 sudo docker-compose up --build
 ```
 
-## Nginx Frond-End
+## Nginx Front-End
 
 http://localhost:80/
 
 ## Tasks
 
-- [x] user register
-- [x] user login
+- [x] user register/ login
 - [x] basic- ui and home
 - [x] token generation
 - [x] private routes
-- [ ] gameserver
-- [ ] play games
+- [x] gameserver
+- [x] play tictactoe
+- [ ] play chess
+- [ ] user stats
+- [ ] tournaments
 
 ## Docker cheatsheet
 
