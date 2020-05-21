@@ -33,14 +33,14 @@ def start_handler(data):
                 'active': "1",
                 'winner': game_state['winner']
             }
-            emit('playing', init_state)  
-            #emit('playing')  # this propably needs change and are here for reference
+            emit('playing', init_state)
+            # emit('playing')  # this propably needs change and are here for reference
     else:
         init_state = {
             'game_id': game_id,
             'player1': username,
             'player2': 'not yet',
-            'board': [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            'board': [None, None, None, None, None, None, None, None, None],
             'turn': 'not yet',
             'active': "0",
             'winner': "0"
@@ -55,11 +55,13 @@ def game_handler(data):
     game_info = json.loads(r.get(game_id))
     emit('response get_state', game_info)  # this propably ok
 
+
 @socketio.on('get_state2')
 def game_handler2(data):
     game_id = data['game_id']
     game_info = json.loads(r.get(game_id))
-    emit('playing', game_info)  
+    emit('playing', game_info)
+
 
 @socketio.on("set_state")
 def set_state2(data):
@@ -74,7 +76,6 @@ def set_state2(data):
     }
     r.set(data['game_id'], json.dumps(state))
     emit('waiting')
-    
 
 
 if __name__ == "__main__":

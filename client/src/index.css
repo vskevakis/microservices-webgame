@@ -1,5 +1,63 @@
+@import url("https://fonts.googleapis.com/css2?family=Merienda+One&family=Poppins:wght@100;300;400&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Merienda+One&display=swap");
+
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
-  padding: 0;
-  font-family: sans-serif;
+  font-family: "Poppins";
+  background: #52d2f1 !important;
+}
+
+.my-container {
+  box-shadow: 10px 10px 20px #7b8099;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 2% !important;
+  border-radius: 20px;
+  background: #ffffff;
+}
+
+.dashboard.btn {
+  margin: 10px 10px 10px 10px !important;
+}
+
+.my-form {
+  /* background: #9fadc5 !important; */
+  box-shadow: 10px 10px 20px #7b8099;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 50px 20px 50px 20px !important;
+  border-radius: 30px;
+  background: #ffffff;
+}
+
+.gamesquare {
+  font-family: "Merienda One";
+  font-size: xx-large;
+  width: 100px;
+  height: 100px;
+  margin: 5px;
+  border-color: black;
+  border-style: solid;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.playbtn {
+  margin-top: 20px;
+}
+
+@media only screen and (max-width: 680px) {
+  .gamesquare {
+    width: 50px;
+    height: 50px;
+    margin: 2px;
+  }
 }

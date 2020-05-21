@@ -1,32 +1,46 @@
 import React, { Component } from "react";
-import { Redirect } from "react-router-dom";
-
-import { checkCookie, setCookie } from "../Authentication/cookies";
+import { Container, Button, Col, Row } from "react-bootstrap";
+import { checkCookie } from "../Authentication/cookies";
 
 class DashboardPage extends Component {
   constructor() {
     super();
     this.state = {
-      username: "",
-      logoutUser: false,
+      username: checkCookie(),
     };
-    this.handleLogout = this.handleLogout.bind(this);
-  }
-
-  handleLogout() {
-    this.setState({ username: checkCookie(), logoutUser: true });
-    setCookie("token", this.state.username, 0);
   }
 
   render() {
-    if (this.state.logoutUser) {
-      return <Redirect to="/" />;
-    }
     return (
-      <div>
-        <h4>Dashboard Here We will display user stats and options</h4>
-        <button onClick={this.handleLogout}>Logout</button>
-      </div>
+      <Container bsPrefix="my-container">
+        <Row className="justify-content-md-center">
+          <Col></Col>
+          <Col md="auto">
+            <h4>
+              Hello {this.state.username}, this is the dashboard and we will
+              display user stats and options
+            </h4>
+          </Col>
+          <Col></Col>
+        </Row>
+        <Row className="justify-content-md-center">
+          <Col md="auto">
+            <Button className="dashboard" href="./chess">
+              Chess
+            </Button>
+          </Col>
+          <Col md="auto">
+            <Button className="dashboard" href="./tictactoe">
+              Tic Tac Toe
+            </Button>
+          </Col>
+          <Col md="auto">
+            <Button className="dashboard" href="./logout">
+              Logout
+            </Button>
+          </Col>
+        </Row>
+      </Container>
     );
   }
 }
