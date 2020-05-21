@@ -1,5 +1,7 @@
 import React, { Component } from "react";
 import { Redirect } from "react-router-dom";
+import { Form, Button, Col } from "react-bootstrap";
+
 import axios from "axios";
 
 import { setCookie } from "../Authentication/cookies";
@@ -31,10 +33,6 @@ class Login extends Component {
 
     await axios.post("http://localhost:80/auth/login", user_data).then(
       (response) => {
-        alert(
-          "Authentication is Successful. Welcome to F-Society, " +
-            user_data.username
-        );
         setCookie("token", user_data.username, 1);
         this.setState({ isAuthenticated: true });
       },
@@ -50,15 +48,44 @@ class Login extends Component {
       return <Redirect to="/dashboard" />;
     }
     return (
-      <form onSubmit={this.handleSubmit}>
-        <label>Username</label>
-        <input type="text" name="username" onChange={this.handleChange} />
-        <br />
-        <label>Password</label>
-        <input type="password" name="password" onChange={this.handleChange} />
-        <br />
-        <button>Submit</button>
-      </form>
+      <Form
+        fluid="md"
+        className="my-form justify-content-center"
+        onSubmit={this.handleSubmit}
+      >
+        <Form.Row className="justify-content-md-center">
+          <h3>Sign In</h3>
+        </Form.Row>
+        <Form.Group controlId="formBasicUsername">
+          <Form.Label>Username</Form.Label>
+          <Form.Control
+            type="text"
+            name="username"
+            placeholder="Enter username"
+            onChange={this.handleChange}
+          />
+        </Form.Group>
+
+        <Form.Group controlId="formBasicPassword">
+          <Form.Label>Password</Form.Label>
+          <Form.Control
+            type="password"
+            name="password"
+            placeholder="Password"
+            onChange={this.handleChange}
+          />
+        </Form.Group>
+        <Form.Row>
+          <Col>
+            <Button variant="primary" type="submit" onClick={this.handleSubmit}>
+              Login
+            </Button>
+          </Col>
+          <Col>
+            <a href="./register"> I don't have an account</a>
+          </Col>
+        </Form.Row>
+      </Form>
     );
   }
 }
