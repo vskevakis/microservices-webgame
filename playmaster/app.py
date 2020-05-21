@@ -19,6 +19,7 @@ r = redis.Redis(host=os.environ['REDIS_HOST'],
 def start_handler(data):
     game_id = data['game_id']
     username = data['username']
+    game_type = data['game_type']
     if (r.exists(game_id)):
         game_state = json.loads(r.get(game_id))
         if (game_state['player1'] == username):
@@ -26,6 +27,7 @@ def start_handler(data):
         else:
             init_state = {
                 'game_id': game_id,
+                'game_type':game_state['game_type'],
                 'player1': game_state['player1'],
                 'player2': username,
                 'board': game_state['board'],
@@ -36,15 +38,39 @@ def start_handler(data):
             emit('playing', init_state)  
             #emit('playing')  # this propably needs change and are here for reference
     else:
-        init_state = {
+        #emit('waiting2')
+        if game_type == "Tic_tac_toe":
+            init_state = {
+                'game_id': game_id,
+                'game_type': "Tic_tac_toe",
+                'player1': username,
+                'player2': 'not yet',
+                'board': [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                'turn': 'not yet',
+                'active': "0",
+                'winner': "0"
+            }
+        elif game_type == "Chess":
+            init_state = {
             'game_id': game_id,
+            'game_type': "Chess",
             'player1': username,
             'player2': 'not yet',
-            'board': [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            'board': 'start',
+            #[
+            #        ['r','n','b','q','k','b','n','r'],
+            #        ['p','p','p','p','p','p','p','p'],
+            #        ['.','.','.','.','.','.','.','.'],
+            #        ['.','.','.','.','.','.','.','.'],
+            #        ['.','.','.','.','.','.','.','.'],
+            #        ['.','.','.','.','.','.','.','.'],
+            #        ['P','P','P','P','P','P','P','P'],
+            #        ['R','N','B','Q','K','B','N','R'], 
+            #        ],
             'turn': 'not yet',
             'active': "0",
             'winner': "0"
-        }
+            }
         emit('waiting')  # this propably needs change and are here for reference
     r.set(game_id, json.dumps(init_state))
 

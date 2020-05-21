@@ -15,13 +15,13 @@ function Square(props) {
   );
 }
 
-class Tictactoe extends React.Component {
+class Chess extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       username: "",
+      game_type:"Chess",
       game_id: "",
-      game_type: "Tic_tac_toe",
       player1: "",
       player2: "",
       board: [],
@@ -30,42 +30,23 @@ class Tictactoe extends React.Component {
       winner: "",
     };
     this.setState = this.setState.bind(this);
-    
-  }
-  calculateWinner(board) {
-    var winner;
-    const lines = [
-      [0, 1, 2],
-      [3, 4, 5],
-      [6, 7, 8],
-      [0, 3, 6],
-      [1, 4, 7],
-      [2, 5, 8],
-      [0, 4, 8],
-      [2, 4, 6]
-    ];
-    for (let i = 0; i < lines.length; i++) {
-      const [a, b, c] = lines[i];
-      if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-        winner = this.state.board[[a]];
-        //console.log("checkEnd ",this.state.board[[a]]);
-      }
-    }
-    return winner;
   }
 
   checkEnd() {
-
-    if (this.calculateWinner(this.state.board)==='X'){
-      this.setState((state) => ({ active: "0"}));
-      this.setState((state) => ({ winner: "2"}));
-    }else if(this.calculateWinner(this.state.board)==='O'){
-      this.setState((state) => ({ active: "0"}));
-      this.setState((state) => ({ winner: "1"}));
-    }else if(this.state.board.every(x => x !== 0)){
-      this.setState((state) => ({ active: "0"}));
-      this.setState((state) => ({ winner: "3"}));
+    if (this.state.board.every(x => x !== "K")){
+        this.setState((state) => ({ active: "0"}));
+        this.setState((state) => ({ winner: "1"}));
+    }else if (this.state.board.every(x => x !== "k")){
+        this.setState((state) => ({ active: "0"}));
+        this.setState((state) => ({ winner: "1"}));
     }
+    // }else if(this.calculateWinner(this.state.board)==='O'){
+    //   this.setState((state) => ({ active: "0"}));
+    //   this.setState((state) => ({ winner: "1"}));
+    // }else if(this.state.board.every(x => x !== 0)){
+    //   this.setState((state) => ({ active: "0"}));
+    //   this.setState((state) => ({ winner: "3"}));
+    // }
     //console.log("checkEnd,stateactive",this.state.active,this.state.winner ,this.state.board);
     if (this.state.active==="0"){
        axios
@@ -84,26 +65,27 @@ class Tictactoe extends React.Component {
     //this.checkEnd();
     //console.log(this.state.game_id);
     //console.log("handle move1",i,this.state.active,this.state.turn,this.state.username,this.state.board[i]);
-    if(this.state.board[i] !== 0 || this.state.active!== "1" || this.state.username !== this.state.turn) {
+    if(this.state.active!== "1" || this.state.username !== this.state.turn) {
       //console.log("handle move3");
       return;
     }
+    //change this to make move
     //console.log("handle move");
-      this.setState(state => {
-      const board = state.board.map((item, j) => {
-        if (j === i && this.state.username !== this.state.player1) {
-          return 'X';
-        }else if(j === i && this.state.username !== this.state.player2){
-          return 'O';
-        } 
-        else {
-          return this.state.board[j];
-        }
-      });
-      return {
-        board,
-      };
-      });
+    //   this.setState(state => {
+    //   const board = state.board.map((item, j) => {
+    //     if (j === i && this.state.username !== this.state.player1) {
+    //       return 'X';
+    //     }else if(j === i && this.state.username !== this.state.player2){
+    //       return 'O';
+    //     } 
+    //     else {
+    //       return this.state.board[j];
+    //     }
+    //   });
+    //   return {
+    //     board,
+    //   };
+    //   });
       if (this.state.turn === this.state.player1)
         {//console.log("next turn if palyer2",this.state.player2);
         this.setState({ turn:this.state.player2 });
@@ -121,7 +103,6 @@ class Tictactoe extends React.Component {
           //console.log("checkEnd",this.state.active,this.state.winner ,this.state.board);
           socket.emit("set_state", {
             game_id : this.state.game_id,
-            game_type : this.state.game_type,
             player1 : this.state.player1,
             player2 : this.state.player2,
             board : this.state.board,
@@ -145,7 +126,6 @@ class Tictactoe extends React.Component {
     socket.on("playing", function (data) {
       //console.log("Playing",data.game_id);
       that.setState((state) => ({ game_id: data.game_id}));
-      that.setState((state) => ({ game_type: data.game_type}));
       that.setState((state) => ({ player1: data.player1}));
       that.setState((state) => ({ player2: data.player2}));
       that.setState((state) => ({ board: data.board}));
@@ -162,7 +142,7 @@ class Tictactoe extends React.Component {
         socket.emit("get_state",  {
           game_id : that.state.game_id
         });
-      }, 1000);
+      }, 1500);
     });
 
     socket.on("response get_state", function (game_info) {
@@ -170,7 +150,6 @@ class Tictactoe extends React.Component {
       if (game_info.turn === that.state.username && game_info.active!=='0') {
         //console.log("response in");
         that.setState((state) => ({ game_id: game_info.game_id}));
-        that.setState((state) => ({ game_type: game_info.game_type}));
         that.setState((state) => ({ player1: game_info.player1}));
         that.setState((state) => ({ player2: game_info.player2}));
         that.setState((state) => ({ board: game_info.board}));
@@ -199,24 +178,23 @@ class Tictactoe extends React.Component {
 
   handleSubmit = async (event) => {
     await axios
-      .post("http://localhost:80/gamemaster/starttictactoe", this.state)
+      .post("http://localhost:80/gamemaster/start_Chess", this.state)
       .then(
         (response) => {
           this.setState((state) => ({ game_id: response.data.gameid}));
-          console.log("Game ID: ", this.state.game_id);
+          //console.log("Game ID: ", this.state.game_id);
+
           //console.log("start ", this.state.game_id);
         },
         (error) => {
-          console.log("gamemaster/StartTicTacToe Error", error);
+          //console.log("gamemaster/StartTicTacToe Error", error);
         }
       );
-      //console.log("username: ", this.state.username, this.state.game_id,this.game_type);
       socket.emit("start", { 
         username: this.state.username,
         game_id: this.state.game_id,
-        game_type: "Tic_tac_toe"
+        game_type :"Chess"
       });
-      this.setState((state) => ({ game_type:"Tic_tac_toe"}));
     //console.log("username: ", this.state.username, this.state.game_id);
   };
 
@@ -232,20 +210,86 @@ class Tictactoe extends React.Component {
   render() {
     return (
       <Container fluid>
+
         <Row className="justify-content-md-center">
           <Col xl="auto">{this.renderSquare(0)}</Col>
           <Col xl="auto">{this.renderSquare(1)}</Col>
           <Col xl="auto">{this.renderSquare(2)}</Col>
-        </Row>
-        <Row className="justify-content-md-center">
           <Col xl="auto">{this.renderSquare(3)}</Col>
           <Col xl="auto">{this.renderSquare(4)}</Col>
           <Col xl="auto">{this.renderSquare(5)}</Col>
-        </Row>
-        <Row className="justify-content-md-center">
           <Col xl="auto">{this.renderSquare(6)}</Col>
           <Col xl="auto">{this.renderSquare(7)}</Col>
+        </Row>
+        <Row className="justify-content-md-center">
           <Col xl="auto">{this.renderSquare(8)}</Col>
+          <Col xl="auto">{this.renderSquare(9)}</Col>
+          <Col xl="auto">{this.renderSquare(10)}</Col>
+          <Col xl="auto">{this.renderSquare(11)}</Col>
+          <Col xl="auto">{this.renderSquare(12)}</Col>
+          <Col xl="auto">{this.renderSquare(13)}</Col>
+          <Col xl="auto">{this.renderSquare(14)}</Col>
+          <Col xl="auto">{this.renderSquare(15)}</Col>
+        </Row>
+        <Row className="justify-content-md-center">
+          <Col xl="auto">{this.renderSquare(16)}</Col>
+          <Col xl="auto">{this.renderSquare(17)}</Col>
+          <Col xl="auto">{this.renderSquare(18)}</Col>
+          <Col xl="auto">{this.renderSquare(19)}</Col>
+          <Col xl="auto">{this.renderSquare(20)}</Col>
+          <Col xl="auto">{this.renderSquare(21)}</Col>
+          <Col xl="auto">{this.renderSquare(22)}</Col>
+          <Col xl="auto">{this.renderSquare(23)}</Col>
+        </Row>
+        <Row className="justify-content-md-center">
+          <Col xl="auto">{this.renderSquare(24)}</Col>
+          <Col xl="auto">{this.renderSquare(25)}</Col>
+          <Col xl="auto">{this.renderSquare(26)}</Col>
+          <Col xl="auto">{this.renderSquare(27)}</Col>
+          <Col xl="auto">{this.renderSquare(28)}</Col>
+          <Col xl="auto">{this.renderSquare(29)}</Col>
+          <Col xl="auto">{this.renderSquare(30)}</Col>
+          <Col xl="auto">{this.renderSquare(31)}</Col>
+        </Row>
+        <Row className="justify-content-md-center">
+          <Col xl="auto">{this.renderSquare(32)}</Col>
+          <Col xl="auto">{this.renderSquare(33)}</Col>
+          <Col xl="auto">{this.renderSquare(34)}</Col>
+          <Col xl="auto">{this.renderSquare(35)}</Col>
+          <Col xl="auto">{this.renderSquare(36)}</Col>
+          <Col xl="auto">{this.renderSquare(37)}</Col>
+          <Col xl="auto">{this.renderSquare(38)}</Col>
+          <Col xl="auto">{this.renderSquare(39)}</Col>
+        </Row>
+        <Row className="justify-content-md-center">
+          <Col xl="auto">{this.renderSquare(40)}</Col>
+          <Col xl="auto">{this.renderSquare(41)}</Col>
+          <Col xl="auto">{this.renderSquare(42)}</Col>
+          <Col xl="auto">{this.renderSquare(43)}</Col>
+          <Col xl="auto">{this.renderSquare(44)}</Col>
+          <Col xl="auto">{this.renderSquare(45)}</Col>
+          <Col xl="auto">{this.renderSquare(46)}</Col>
+          <Col xl="auto">{this.renderSquare(47)}</Col>
+        </Row>
+        <Row className="justify-content-md-center">
+          <Col xl="auto">{this.renderSquare(48)}</Col>
+          <Col xl="auto">{this.renderSquare(49)}</Col>
+          <Col xl="auto">{this.renderSquare(50)}</Col>
+          <Col xl="auto">{this.renderSquare(51)}</Col>
+          <Col xl="auto">{this.renderSquare(52)}</Col>
+          <Col xl="auto">{this.renderSquare(53)}</Col>
+          <Col xl="auto">{this.renderSquare(54)}</Col>
+          <Col xl="auto">{this.renderSquare(55)}</Col>
+        </Row>
+        <Row className="justify-content-md-center">
+          <Col xl="auto">{this.renderSquare(56)}</Col>
+          <Col xl="auto">{this.renderSquare(57)}</Col>
+          <Col xl="auto">{this.renderSquare(58)}</Col>
+          <Col xl="auto">{this.renderSquare(59)}</Col>
+          <Col xl="auto">{this.renderSquare(60)}</Col>
+          <Col xl="auto">{this.renderSquare(61)}</Col>
+          <Col xl="auto">{this.renderSquare(62)}</Col>
+          <Col xl="auto">{this.renderSquare(63)}</Col>
         </Row>
         <Button onClick={this.handleSubmit}>PLAY!</Button>
       </Container>
