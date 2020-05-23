@@ -3,7 +3,11 @@ import { Button, Row, Container, Col } from "react-bootstrap";
 import io from "socket.io-client";
 import axios from "axios";
 import { checkCookie } from "../Authentication/cookies";
+import { Chess } from "chess.js"; // import Chess from  "chess.js"(default) if recieving an error about new Chess() not being a constructor
+import Chessboard from "chessboardjsx";
 
+// var board = Chessboard('myBoard')
+// var game = new Chess()
 const socket = io.connect();
 
 //function Square(props) {
@@ -211,90 +215,31 @@ class Chess extends React.Component {
     return (
       <Container fluid>
 
-        <Row className="justify-content-md-center">
-          <Col xl="auto">{this.renderSquare(0)}</Col>
-          <Col xl="auto">{this.renderSquare(1)}</Col>
-          <Col xl="auto">{this.renderSquare(2)}</Col>
-          <Col xl="auto">{this.renderSquare(3)}</Col>
-          <Col xl="auto">{this.renderSquare(4)}</Col>
-          <Col xl="auto">{this.renderSquare(5)}</Col>
-          <Col xl="auto">{this.renderSquare(6)}</Col>
-          <Col xl="auto">{this.renderSquare(7)}</Col>
+        <div style={boardsContainer}>
+          <WithMoveValidation />
+        </div>
+        <Row className="justify-content-md-center">{this.renderWaiting()}</Row>
+        <Row className="justify-content-md-center playbtn">
+          <Col className="justify-content-md-center">
+            <Button ref={btn => { this.btn = btn; }}  onClick={this.handleSubmit}>Play!</Button>
+          </Col>
+        <Col className="justify-content-md-center">
+            <Button href="./dashboard">Exit</Button>
+        </Col>
         </Row>
-        <Row className="justify-content-md-center">
-          <Col xl="auto">{this.renderSquare(8)}</Col>
-          <Col xl="auto">{this.renderSquare(9)}</Col>
-          <Col xl="auto">{this.renderSquare(10)}</Col>
-          <Col xl="auto">{this.renderSquare(11)}</Col>
-          <Col xl="auto">{this.renderSquare(12)}</Col>
-          <Col xl="auto">{this.renderSquare(13)}</Col>
-          <Col xl="auto">{this.renderSquare(14)}</Col>
-          <Col xl="auto">{this.renderSquare(15)}</Col>
-        </Row>
-        <Row className="justify-content-md-center">
-          <Col xl="auto">{this.renderSquare(16)}</Col>
-          <Col xl="auto">{this.renderSquare(17)}</Col>
-          <Col xl="auto">{this.renderSquare(18)}</Col>
-          <Col xl="auto">{this.renderSquare(19)}</Col>
-          <Col xl="auto">{this.renderSquare(20)}</Col>
-          <Col xl="auto">{this.renderSquare(21)}</Col>
-          <Col xl="auto">{this.renderSquare(22)}</Col>
-          <Col xl="auto">{this.renderSquare(23)}</Col>
-        </Row>
-        <Row className="justify-content-md-center">
-          <Col xl="auto">{this.renderSquare(24)}</Col>
-          <Col xl="auto">{this.renderSquare(25)}</Col>
-          <Col xl="auto">{this.renderSquare(26)}</Col>
-          <Col xl="auto">{this.renderSquare(27)}</Col>
-          <Col xl="auto">{this.renderSquare(28)}</Col>
-          <Col xl="auto">{this.renderSquare(29)}</Col>
-          <Col xl="auto">{this.renderSquare(30)}</Col>
-          <Col xl="auto">{this.renderSquare(31)}</Col>
-        </Row>
-        <Row className="justify-content-md-center">
-          <Col xl="auto">{this.renderSquare(32)}</Col>
-          <Col xl="auto">{this.renderSquare(33)}</Col>
-          <Col xl="auto">{this.renderSquare(34)}</Col>
-          <Col xl="auto">{this.renderSquare(35)}</Col>
-          <Col xl="auto">{this.renderSquare(36)}</Col>
-          <Col xl="auto">{this.renderSquare(37)}</Col>
-          <Col xl="auto">{this.renderSquare(38)}</Col>
-          <Col xl="auto">{this.renderSquare(39)}</Col>
-        </Row>
-        <Row className="justify-content-md-center">
-          <Col xl="auto">{this.renderSquare(40)}</Col>
-          <Col xl="auto">{this.renderSquare(41)}</Col>
-          <Col xl="auto">{this.renderSquare(42)}</Col>
-          <Col xl="auto">{this.renderSquare(43)}</Col>
-          <Col xl="auto">{this.renderSquare(44)}</Col>
-          <Col xl="auto">{this.renderSquare(45)}</Col>
-          <Col xl="auto">{this.renderSquare(46)}</Col>
-          <Col xl="auto">{this.renderSquare(47)}</Col>
-        </Row>
-        <Row className="justify-content-md-center">
-          <Col xl="auto">{this.renderSquare(48)}</Col>
-          <Col xl="auto">{this.renderSquare(49)}</Col>
-          <Col xl="auto">{this.renderSquare(50)}</Col>
-          <Col xl="auto">{this.renderSquare(51)}</Col>
-          <Col xl="auto">{this.renderSquare(52)}</Col>
-          <Col xl="auto">{this.renderSquare(53)}</Col>
-          <Col xl="auto">{this.renderSquare(54)}</Col>
-          <Col xl="auto">{this.renderSquare(55)}</Col>
-        </Row>
-        <Row className="justify-content-md-center">
-          <Col xl="auto">{this.renderSquare(56)}</Col>
-          <Col xl="auto">{this.renderSquare(57)}</Col>
-          <Col xl="auto">{this.renderSquare(58)}</Col>
-          <Col xl="auto">{this.renderSquare(59)}</Col>
-          <Col xl="auto">{this.renderSquare(60)}</Col>
-          <Col xl="auto">{this.renderSquare(61)}</Col>
-          <Col xl="auto">{this.renderSquare(62)}</Col>
-          <Col xl="auto">{this.renderSquare(63)}</Col>
-        </Row>
-        <Button onClick={this.handleSubmit}>PLAY!</Button>
       </Container>
     );
   }
 }
 
-export default Tictactoe;
+export default Chess;
+
+const boardsContainer = {
+  display: "flex",
+  justifyContent: "space-around",
+  alignItems: "center",
+  flexWrap: "wrap",
+  width: "100vw",
+  marginTop: 30,
+  marginBottom: 50
+};
