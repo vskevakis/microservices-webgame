@@ -25,9 +25,11 @@ http://localhost:80/
 - [x] private routes
 - [x] gameserver
 - [x] play tictactoe
+- [x] user stats
 - [ ] play chess
-- [ ] user stats
 - [ ] tournaments
+- [ ] zookeeper
+- [ ] deployment
 
 ## Docker cheatsheet
 
