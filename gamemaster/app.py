@@ -113,7 +113,6 @@ def getscores():
     # data = request.get_json()
     # username = data.get('username')
     scores = Userscore.query.filter_by(username=username).first()
-
     return scores.json()
 
 
@@ -202,55 +201,6 @@ def starttictactoe():
                 return jsonify(data)
         else:
             queue = Queue.query.filter_by(username=username).first()
-            data = {}
-            data['gameid'] = queue.gameid
-            return jsonify(data)
-    else:
-        return Response("error: name not found", status=401)
-
-@app.route("/gamemaster/tic_tac_toc_tourn", methods=["POST"])
-def tic_tac_toc_tourn():
-    username = request.json['username']
-    if Userscore.query.filter_by(username=username).first() is not None:
-        if Playing.query.filter_by(player1=username).first() is not None:
-        elif Playing.query.filter_by(player2=username).first() is not None:
-            playing = db.session.query(Playing).filter_by(player2=username).first()   
-            data = {}
-            data['gameid'] = playing.gameid
-            return jsonify(data)
-        if Queue.query.filter_by(username=username).first() is None:
-            if len(db.session.query(Queue).all()) >= 1:
-                queue = db.session.query(Queue).first()
-                data = {}
-            playing = db.session.query(Playing).filter_by(player1=username).first()   
-            data = {}
-            data['gameid'] = playing.gameid
-            return jsonify(data)
-                data['gameid'] = queue.gameid
-                playing = Playing(
-                    gameid=queue.gameid,
-                    player1=queue.username,
-                    player2=username
-                )
-                db.session.add(playing)
-                db.session.delete(queue)
-                db.session.commit()
-                return jsonify(data)
-            else:
-                now = datetime.now()
-                dt_string = now.strftime("%d/%m/%Y %H:%M:%S.%f")[:-3]
-                gameid = "Tic_tac_toe"+"_"+dt_string
-                data = {}
-                data['gameid'] = gameid
-                queue = Queue(
-                    gameid=gameid,
-                    username=username
-                )
-                db.session.add(queue)
-                db.session.commit()
-                return jsonify(data)
-        else:
-            queue=Queue.query.filter_by(username=username).first()
             data = {}
             data['gameid'] = queue.gameid
             return jsonify(data)
