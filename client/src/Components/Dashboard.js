@@ -19,7 +19,6 @@ class DashboardPage extends Component {
   }
 
   componentDidMount() {
-    var that = this;
     axios
       .post("http://localhost:80/gamemaster/getscores", {
         username: this.state.username,
@@ -37,7 +36,7 @@ class DashboardPage extends Component {
           }));
         },
         (error) => {
-          alert("Axios Error.");
+          console.log("Gamemaster/GetScores - Axios Error.");
         }
       );
   }
