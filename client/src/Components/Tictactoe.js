@@ -76,8 +76,8 @@ class Tictactoe extends React.Component {
             console.log("gamemaster/updatescores Error", error);
           }
         );
+      console.log("checkEnd", this.state.winner);
     }
-    //console.log("checkEnd",this.state.active,this.state.winner ,this.state.board);
   }
 
   handleMove(i) {
@@ -120,20 +120,20 @@ class Tictactoe extends React.Component {
       //console.log("currnet player ,next turn",this.state.username,this.state.turn,this.state.board[i],this.state.game_id);
       this.checkEnd();
       setTimeout(() => {
-          //console.log("checkEnd",this.state.active,this.state.winner ,this.state.board);
-          socket.emit("set_state", {
-            game_id : this.state.game_id,
-            game_type : this.state.game_type,
-            player1 : this.state.player1,
-            player2 : this.state.player2,
-            board : this.state.board,
-            turn : this.state.turn,
-            active : this.state.active,
-            winner : this.state.winner
-          });
-      }, 10);  
-      return; 
-    }, 10);  
+        //console.log("checkEnd",this.state.active,this.state.winner ,this.state.board);
+        socket.emit("set_state", {
+          game_id: this.state.game_id,
+          game_type: this.state.game_type,
+          player1: this.state.player1,
+          player2: this.state.player2,
+          board: this.state.board,
+          turn: this.state.turn,
+          active: this.state.active,
+          winner: this.state.winner,
+        });
+      }, 10);
+      return;
+    }, 10);
     //console.log("currnet player ,next turn",this.state.username,this.state.turn,this.state.board[i]);
   }
 
@@ -146,7 +146,7 @@ class Tictactoe extends React.Component {
     socket.on("playing", function (data) {
       //console.log("Playing",data.game_id);
       that.setState((state) => ({ game_id: data.game_id }));
-      that.setState((state) => ({ game_type: data.game_type}));
+      that.setState((state) => ({ game_type: data.game_type }));
       that.setState((state) => ({ player1: data.player1 }));
       that.setState((state) => ({ player2: data.player2 }));
       that.setState((state) => ({ board: data.board }));
@@ -167,7 +167,7 @@ class Tictactoe extends React.Component {
     socket.on("response get_state", function (game_info) {
       if (game_info.turn === that.state.username && game_info.active !== "0") {
         that.setState((state) => ({ game_id: game_info.game_id }));
-        that.setState((state) => ({ game_type: game_info.game_type}));
+        that.setState((state) => ({ game_type: game_info.game_type }));
         that.setState((state) => ({ player1: game_info.player1 }));
         that.setState((state) => ({ player2: game_info.player2 }));
         that.setState((state) => ({ board: game_info.board }));
@@ -205,7 +205,7 @@ class Tictactoe extends React.Component {
       .post("http://localhost:80/gamemaster/starttictactoe", this.state)
       .then(
         (response) => {
-          this.setState((state) => ({ game_id: response.data.gameid}));
+          this.setState((state) => ({ game_id: response.data.gameid }));
           console.log("Game ID: ", this.state.game_id);
           //console.log("start ", this.state.game_id);
         },
@@ -213,14 +213,14 @@ class Tictactoe extends React.Component {
           console.log("gamemaster/StartTicTacToe Error", error);
         }
       );
-      //console.log("username: ", this.state.username, this.state.game_id,this.game_type);
-      socket.emit("start", { 
-        username: this.state.username,
-        game_id: this.state.game_id,
-        game_type: "Tic_tac_toe"
-      });
-      this.setState((state) => ({ game_type:"Tic_tac_toe"}));
-      this.btn.setAttribute("disabled", "disabled");
+    //console.log("username: ", this.state.username, this.state.game_id,this.game_type);
+    socket.emit("start", {
+      username: this.state.username,
+      game_id: this.state.game_id,
+      game_type: "Tic_tac_toe",
+    });
+    this.setState((state) => ({ game_type: "Tic_tac_toe" }));
+    this.btn.setAttribute("disabled", "disabled");
     //console.log("username: ", this.state.username, this.state.game_id);
   };
 
@@ -258,7 +258,14 @@ class Tictactoe extends React.Component {
         <Row className="justify-content-md-center">{this.renderWaiting()}</Row>
         <Row className="justify-content-md-center playbtn">
           <Col className="justify-content-md-center">
-            <Button ref={btn => { this.btn = btn; }}  onClick={this.handleSubmit}>Play!</Button>
+            <Button
+              ref={(btn) => {
+                this.btn = btn;
+              }}
+              onClick={this.handleSubmit}
+            >
+              Play!
+            </Button>
           </Col>
           <Col className="justify-content-md-center">
             <Button href="./dashboard">Exit</Button>
