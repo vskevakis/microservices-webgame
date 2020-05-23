@@ -1,7 +1,5 @@
 # from app import Userscore, Queue, Queuetournament, Tournament
-
 import os
-import requests
 from flask import Flask, jsonify, Response, request
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
@@ -31,15 +29,15 @@ class Userscore(db.Model):
     # user_id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(255), unique=True,
                          nullable=False, primary_key=True)
-    Wins = db.Column(db.Integer)
-    Ties = db.Column(db.Integer)
-    Loses = db.Column(db.Integer)
-    Winschess = db.Column(db.Integer)
-    Tieschess = db.Column(db.Integer)
-    Loseschess = db.Column(db.Integer)
+    t_wins = db.Column(db.Integer)
+    t_ties = db.Column(db.Integer)
+    t_loses = db.Column(db.Integer)
+    c_wins = db.Column(db.Integer)
+    c_ties = db.Column(db.Integer)
+    c_loses = db.Column(db.Integer)
 
     def json(self):
-        return {"username": self.username, "Wins": self.Wins, "Ties": self.Ties, "Loses": self.Loses , "Winschess": self.Winschess, "Tieschess": self.Tieschess, "Loseschess": self.Loseschess}
+        return {"username": self.username, "t_wins": self.t_wins, "t_ties": self.t_ties, "t_loses": self.t_loses, "c_wins": self.c_wins, "c_ties": self.c_ties, "c_loses": self.c_loses}
 
 
 class Queue(db.Model):
@@ -47,13 +45,16 @@ class Queue(db.Model):
     gameid = db.Column(db.String(255), unique=True,
                        nullable=False, primary_key=True)
     username = db.Column(db.String(255), unique=True,
-                          nullable=False)
+                         nullable=False)
+
+
 class Queue_Chess(db.Model):
     __tablename__ = "queue_Chess"
     gameid = db.Column(db.String(255), unique=True,
                        nullable=False, primary_key=True)
     username = db.Column(db.String(255), unique=True,
                          nullable=False, primary_key=True)
+
 
 class Queuetournament(db.Model):
     __tablename__ = "queuetournament"
@@ -62,14 +63,15 @@ class Queuetournament(db.Model):
     username = db.Column(db.String(255), unique=True,
                          nullable=False, primary_key=True)
 
+
 class Playing(db.Model):
     __tablename__ = "playing"
     gameid = db.Column(db.String(255), unique=True,
                        nullable=False, primary_key=True)
     player1 = db.Column(db.String(255), unique=True,
-                          nullable=False)
+                        nullable=False)
     player2 = db.Column(db.String(255), unique=True,
-                          nullable=False)
+                        nullable=False)
 
 
 class Tournament(db.Model):
@@ -92,12 +94,12 @@ def createUser():
 
     userscore = Userscore(
         username=username,
-        Wins=0,
-        Ties=0,
-        Loses=0,
-        #WinsChess=0,
-        #TiesChess=0,
-        #LosesChess=0
+        t_wins=0,
+        t_ties=0,
+        t_loses=0,
+        c_wins=0,
+        c_ties=0,
+        c_loses=0
     )
     db.session.add(userscore)
     db.session.commit()
@@ -105,12 +107,14 @@ def createUser():
     return Response("Userdb created with great success" + username, status=200)
 
 
-@app.route("/gamemaster/getscores", methods=["GET"])
+@app.route("/gamemaster/getscores", methods=["POST"])
 def getscores():
     username = request.json['username']
+    # data = request.get_json()
+    # username = data.get('username')
     scores = Userscore.query.filter_by(username=username).first()
 
-    return jsonify(scores.json())
+    return scores.json()
 
 
 # winner is : 1) for player1 win,2) for player2 win,else tie
@@ -119,33 +123,33 @@ def updatescores():
     username = request.json['player1']
     username2 = request.json['player2']
     winner = request.json['winner']
-    game_type = "Tic_tac_toe" #request.json['game_type']
+    game_type = "Tic_tac_toe"  # request.json['game_type']
     scores1 = Userscore.query.filter_by(username=username).first()
     scores2 = Userscore.query.filter_by(username=username2).first()
-    if game_type=="Chess":
-        if winner == 1:
-            scores1.WinsChess = scores1.WinsChess + 1
-            scores2.LosesChess = scores2.LosesChess + 1
-        elif winner == 2:
-            scores1.LosesChess = scores1['LosesChess'] + 1
-            scores2.WinsChess = scores2['WinsChess'] + 1
+    if game_type == "Chess":
+        if winner == "1":
+            scores1.c_wins = scores1.c_wins + 1
+            scores2.c_loses = scores2.c_loses + 1
+        elif winner == "2":
+            scores1.c_loses = scores1.c_loses + 1
+            scores2.c_wins = scores2.c_wins + 1
         else:
-            scores1.TiesChess = scores1.TiesChess + 1
-            scores2.TiesChess = scores2.TiesChess + 1
-    elif game_type=="Tic_tac_toe":
-        if winner == 1:
-            scores1.Wins = scores1.Wins + 1
-            scores2.Loses = scores2.Loses + 1
-        elif winner == 2:
-            scores1.Loses = scores1['Loses'] + 1
-            scores2.Wins = scores2['Wins'] + 1
+            scores1.c_ties = scores1.c_ties + 1
+            scores2.c_ties = scores2.c_ties + 1
+    elif game_type == "Tic_tac_toe":
+        if winner == "1":
+            scores1.t_wins = scores1.t_wins + 1
+            scores2.t_loses = scores2.t_loses + 1
+        elif winner == "2":
+            scores1.t_loses = scores1.t_loses + 1
+            scores2.t_wins = scores2.t_wins + 1
         else:
-            scores1.Ties = scores1.Ties + 1
-            scores2.Ties = scores2.Ties + 1
+            scores1.t_ties = scores1.t_ties + 1
+            scores2.t_ties = scores2.t_ties + 1
     if Playing.query.filter_by(player1=username).first() is not None:
-        playing=Playing.query.filter_by(player1=username).first()
+        playing = Playing.query.filter_by(player1=username).first()
     else:
-        playing=Playing.query.filter_by(player2=username).first()
+        playing = Playing.query.filter_by(player2=username).first()
     db.session.delete(playing)
     db.session.add(scores1)
     db.session.add(scores2)
@@ -158,12 +162,14 @@ def starttictactoe():
     username = request.json['username']
     if Userscore.query.filter_by(username=username).first() is not None:
         if Playing.query.filter_by(player1=username).first() is not None:
-            playing = db.session.query(Playing).filter_by(player1=username).first()   
+            playing = db.session.query(Playing).filter_by(
+                player1=username).first()
             data = {}
             data['gameid'] = playing.gameid
             return jsonify(data)
         if Playing.query.filter_by(player2=username).first() is not None:
-            playing = db.session.query(Playing).filter_by(player2=username).first()   
+            playing = db.session.query(Playing).filter_by(
+                player2=username).first()
             data = {}
             data['gameid'] = playing.gameid
             return jsonify(data)
@@ -195,7 +201,7 @@ def starttictactoe():
                 db.session.commit()
                 return jsonify(data)
         else:
-            queue=Queue.query.filter_by(username=username).first()
+            queue = Queue.query.filter_by(username=username).first()
             data = {}
             data['gameid'] = queue.gameid
             return jsonify(data)

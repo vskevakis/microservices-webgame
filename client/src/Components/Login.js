@@ -4,7 +4,7 @@ import { Form, Button, Col } from "react-bootstrap";
 
 import axios from "axios";
 
-import { setCookie } from "../Authentication/cookies";
+import { checkCookie, setCookie } from "../Authentication/cookies";
 
 class Login extends Component {
   constructor() {
@@ -12,6 +12,7 @@ class Login extends Component {
     this.state = {
       username: "",
       password: "",
+      isAuthenticated: checkCookie(),
     };
     this.handleChange = this.handleChange.bind(this);
   }
