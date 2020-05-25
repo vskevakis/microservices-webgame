@@ -8,6 +8,7 @@ import { Logout } from "./Logout";
 
 import Dashboard from "./Dashboard";
 import Tictactoe from "./Tictactoe";
+import My_Chess from "./Chess";
 
 const Routes = () => (
   <Switch>
@@ -17,6 +18,7 @@ const Routes = () => (
     <Route exact path="/logout" component={Logout} />
     <PrivateRoute path="/dashboard" component={Dashboard} />
     <PrivateRoute path="/tictactoe" component={Tictactoe} />
+    <PrivateRoute path="/chess" component={My_Chess} />
   </Switch>
 );
 
