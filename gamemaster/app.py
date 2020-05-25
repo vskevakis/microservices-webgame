@@ -122,7 +122,7 @@ def updatescores():
     username = request.json['player1']
     username2 = request.json['player2']
     winner = request.json['winner']
-    game_type = "Tic_tac_toe"  # request.json['game_type']
+    game_type =request.json['game_type'] #"Tic_tac_toe"  # request.json['game_type']
     scores1 = Userscore.query.filter_by(username=username).first()
     scores2 = Userscore.query.filter_by(username=username2).first()
     if game_type == "Chess":
@@ -208,29 +208,80 @@ def starttictactoe():
         return Response("error: name not found", status=401)
 
 
+# @app.route("/gamemaster/start_Chess", methods=["POST"])
+# def start_Chess():
+#     username = request.json['username']
+#     if Userscore.query.filter_by(username=username).first() is not None:
+#         if len(db.session.query(Queue_Chess).all()) >= 1:
+#             queue_Chess = db.session.query(Queue_Chess).first()
+#             data = {}
+#             data['gameid'] = queue_Chess.gameid
+#             db.session.delete(queue_Chess)
+#             db.session.commit()
+#             return jsonify(data)
+#         else:
+#             now = datetime.now()
+#             dt_string = now.strftime("%d/%m/%Y %H:%M:%S.%f")[:-3]
+#             gameid = "Chess"+"_"+dt_string
+#             data = {}
+#             data['gameid'] = gameid
+#             queue_Chess = Queue_Chess(
+#                 gameid=gameid
+#             )
+#             db.session.add(queue_Chess)
+#             db.session.commit()
+#             return jsonify(data)
+#     else:
+#         return Response("error: name not found", status=401)
+
+
 @app.route("/gamemaster/start_Chess", methods=["POST"])
 def start_Chess():
     username = request.json['username']
     if Userscore.query.filter_by(username=username).first() is not None:
-        if len(db.session.query(Queue_Chess).all()) >= 1:
-            queue_Chess = db.session.query(Queue_Chess).first()
+        if Playing.query.filter_by(player1=username).first() is not None:
+            playing = db.session.query(Playing).filter_by(
+                player1=username).first()
+            data = {}
+            data['gameid'] = playing.gameid
+            return jsonify(data)
+        if Playing.query.filter_by(player2=username).first() is not None:
+            playing = db.session.query(Playing).filter_by(
+                player2=username).first()
+            data = {}
+            data['gameid'] = playing.gameid
+            return jsonify(data)
+        if Queue_Chess.query.filter_by(username=username).first() is None:
+            if len(db.session.query(Queue_Chess).all()) >= 1:
+                queue_Chess = db.session.query(Queue_Chess).first()
+                data = {}
+                data['gameid'] = queue_Chess.gameid
+                playing = Playing(
+                    gameid=queue_Chess.gameid,
+                    player1=queue_Chess.username,
+                    player2=username
+                )
+                db.session.add(playing)
+                db.session.delete(queue_Chess)
+                db.session.commit()
+                return jsonify(data)
+            else:
+                now = datetime.now()
+                dt_string = now.strftime("%d/%m/%Y %H:%M:%S.%f")[:-3]
+                gameid = "Chess"+"_"+dt_string
+                data = {}
+                data['gameid'] = gameid
+                queue_Chess = Queue_Chess(
+                    gameid=gameid,
+                    username=username
+                )
+                db.session.add(queue_Chess)
+                db.session.commit()
+                return jsonify(data)
+        else:
+            queue_Chess = Queue_Chess.query.filter_by(username=username).first()
             data = {}
             data['gameid'] = queue_Chess.gameid
-
-            db.session.delete(queue_Chess)
-            db.session.commit()
-            return jsonify(data)
-        else:
-            now = datetime.now()
-            dt_string = now.strftime("%d/%m/%Y %H:%M:%S.%f")[:-3]
-            gameid = "Chess"+"_"+dt_string
-            data = {}
-            data['gameid'] = gameid
-            queue_Chess = Queue_Chess(
-                gameid=gameid
-            )
-            db.session.add(queue_Chess)
-            db.session.commit()
             return jsonify(data)
     else:
         return Response("error: name not found", status=401)
