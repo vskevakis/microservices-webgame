@@ -74,11 +74,17 @@ class My_Chess extends React.Component {
         that.setState((state) => ({ turn: game_info.turn }));
         that.setState((state) => ({ active: game_info.active }));
         that.setState((state) => ({ winner: game_info.winner }));
-        //useless atm not saving it at memory
-        that.setState((state) => ({ waiting: game_info.waiting  }));
+        //useless atm not saving it at memory     
         console.log("response get_state,that.state.board", that.state.board);
         that.setState((state) => ({ fen: that.state.board }));
         that.game.load(that.state.board);
+        if (that.game.in_check()) {
+          console.log("Check");
+          //useless atm not saving it at memory
+          that.setState((state) => ({ waiting: "Check" }));
+        }else{
+          that.setState((state) => ({ waiting: 'playing' }));
+        }
       } else if (game_info.active === "0" && game_info.winner !== "0") {
         //setTimeout(function () {alert("gameover");}, 1000);
         that.btn.removeAttribute("disabled");
@@ -86,9 +92,17 @@ class My_Chess extends React.Component {
         if (game_info.winner === "3") {
           alert("It's a tie");
         } else if (game_info.winner === "2") {
-          alert("Player 2 won :" + game_info.player2);
+          if (game_info.player2 === that.state.username) {
+            alert("You won!");
+          } else {
+            alert("Sorry, you lost!");
+          }
         } else {
-          alert("Player 1 won :" + game_info.player1);
+          if (game_info.player1 === that.state.username) {
+            alert("You won!");
+          } else {
+            alert("Sorry, you lost!");
+          }
         }
       } else {
         //console.log("response else");
@@ -158,7 +172,6 @@ class My_Chess extends React.Component {
         turn: this.state.turn,
         active: this.state.active,
         winner: this.state.winner,
-        waiting: this.state.waiting,
       });
     }, 10);
     setTimeout(() => {

@@ -33,7 +33,7 @@ def start_handler(data):
                 'board': game_state['board'],
                 'turn': username,
                 'active': "1",
-                'winner': game_state['winner']
+                'winner': game_state['winner'],
             }
             emit('playing', init_state)
             # emit('playing')  # this propably needs change and are here for reference
@@ -48,18 +48,18 @@ def start_handler(data):
                 'board': [None, None, None, None, None, None, None, None, None],
                 'turn': 'not yet',
                 'active': "0",
-                'winner': "0"
+                'winner': "0",
             }
         elif game_type == "Chess":
             init_state = {
-            'game_id': game_id,
-            'game_type': "Chess",
-            'player1': username,
-            'player2': 'not yet',
-            'board': 'start',
-            'turn': 'not yet',
-            'active': "0",
-            'winner': "0"
+                'game_id': game_id,
+                'game_type': "Chess",
+                'player1': username,
+                'player2': 'not yet',
+                'board': 'start',
+                'turn': 'not yet',
+                'active': "0",
+                'winner': "0",
             }
         emit('waiting')  # this propably needs change and are here for reference
     r.set(game_id, json.dumps(init_state))
@@ -88,7 +88,7 @@ def set_state2(data):
         'board': data['board'],
         'turn': data['turn'],
         'active': data['active'],
-        'winner': data['winner']
+        'winner': data['winner'],
     }
     r.set(data['game_id'], json.dumps(state))
     emit('waiting')
