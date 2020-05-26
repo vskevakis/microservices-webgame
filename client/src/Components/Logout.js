@@ -4,6 +4,6 @@ import { Redirect } from "react-router-dom";
 import { checkCookie, setCookie } from "../Authentication/cookies";
 
 export function Logout(props) {
-  setCookie("token", checkCookie(), 0);
+  setCookie("token", null);
   return <Redirect to="/" />;
 }

@@ -34,7 +34,7 @@ class Login extends Component {
 
     await axios.post("http://localhost:80/auth/login", user_data).then(
       (response) => {
-        setCookie("token", user_data.username, 1);
+        setCookie("token", response.data);
         this.setState({ isAuthenticated: true });
       },
       (error) => {

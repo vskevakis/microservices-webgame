@@ -3,8 +3,7 @@ import { Redirect } from "react-router-dom";
 import { Form, Button, Col } from "react-bootstrap";
 import axios from "axios";
 
-import { checkCookie,setCookie } from "../Authentication/cookies";
-
+import { checkCookie, setCookie } from "../Authentication/cookies";
 
 class Register extends Component {
   constructor() {
@@ -36,7 +35,7 @@ class Register extends Component {
 
     await axios.post("http://localhost:80/auth/register", user_data).then(
       (response) => {
-        setCookie("token", user_data.username, 1);
+        setCookie("token", response.data);
         this.setState({ isAuthenticated: true });
       },
       (error) => {

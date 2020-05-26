@@ -1,8 +1,13 @@
 import os
 import requests
+import jwt
+import datetime
+import json
+
 from flask import Flask, jsonify, Response, request
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+
 # Initialize Application
 app = Flask(__name__)
 
@@ -16,6 +21,10 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://{user}:{password}
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+app.config['SECRET_KEY'] = 'my_secret_key'
+
+jwt_secret_key = "secret"
+
 # Initialize Database
 db = SQLAlchemy(app)
 
@@ -28,9 +37,10 @@ class User(db.Model):
     username = db.Column(db.String(255), unique=True, nullable=False)
     email = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.String(255))
+    user_role = db.Column(db.String(255))
 
     def json(self):
-        return {"id": self.user_id, "username": self.username, "email": self.email, "password": self.password}
+        return {"id": self.user_id, "username": self.username, "email": self.email, "password": self.password, "user_role": self.user_role}
 
 
 # Create Database Table and Model
@@ -62,14 +72,19 @@ def register():
         user = User(
             username=username,
             email=email,
-            password=generate_password_hash(password, method='sha256')
+            password=generate_password_hash(password, method='sha256'),
+            user_role="user"  # default role is user
         )
         db.session.add(user)
         db.session.commit()
         # needs work  error handling if add user didnt work
         initscoredb = requests.post(
             "http://gamemaster:5002/gamemaster/createUser", json={"username": username})
-        return Response("User created with great success"+str(initscoredb), status=200)
+        token = encodeAuthToken(user.username, user.user_role)
+        return token
+        # REMEMBER TO REMOVE DECODE FROM HERE BEFORE PRODUCTION
+        # dec = decodeAuthToken(token)
+        # return Response("User created with token"+str(dec), status=200)
 
 
 @app.route("/auth/login", methods=["POST"])
@@ -84,7 +99,94 @@ def login():
     if not check_password:
         error = 'Password is incorrect'
         return Response(error, status=400)
-    return Response('User Authenticated with GREAT SUCCESS', status=200)
+    token = encodeAuthToken(user.username, user.user_role)
+    return token
+    # REMEMBER TO REMOVE DECODE FROM HERE BEFORE PRODUCTION
+    # dec = decodeAuthToken(token)
+    # return Response('User Authenticated with token ' + str(dec), status=200)
+
+
+@app.route("/auth/check_token", methods=["POST"])
+def check_token():
+    token = request.json['token']
+    dec = decodeAuthToken(token)
+    if dec['username'] is None:
+        error = "Validation Unsuccessfull"
+        return Response(error, status=400)
+    response = {
+        'username': dec['username'],
+        'user_role': dec['user_role'],
+    }
+    return jsonify(response)
+
+
+@app.route("/auth/make_admin", methods=["POST"])
+def make_admin():
+    username = request.json['username']
+    user = db.session.query(User).filter_by(username=username).first()
+    if user is None:
+        error = 'A User with that username does not exist'
+        return Response(error, status=400)
+    if user.user_role == "admin":
+        error = 'This user is already an admin'
+        return Response(error, status=400)
+    user.user_role = "admin"
+    db.session.commit()
+    # Generate New Token
+    token = encodeAuthToken(user.username, user.user_role)
+    return token
+    # REMEMBER TO REMOVE DECODE FROM HERE BEFORE PRODUCTION
+    # dec = decodeAuthToken(token)
+    # return Response('User promoted to admin. New token ' + str(dec), status=200)
+
+
+@app.route("/auth/make_official", methods=["POST"])
+def make_official():
+    username = request.json['username']
+    user = db.session.query(User).filter_by(username=username).first()
+    if user is None:
+        error = 'A User with that username does not exist'
+        return Response(error, status=400)
+    if user.user_role == "official":
+        error = 'This user is already an official'
+        return Response(error, status=400)
+
+    user.user_role = "official"
+    db.session.commit()
+    # Generate New Token
+    token = encodeAuthToken(user.username, user.user_role)
+    return token
+    # REMEMBER TO REMOVE DECODE FROM HERE BEFORE PRODUCTION
+    # dec = decodeAuthToken(token)
+    # return Response('User promoted to official. New token ' + str(dec), status=200)
+
+
+# JWT TOKEN
+def encodeAuthToken(username, user_role):
+    try:
+        payload = {
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(days=0, minutes=60),
+            'iat': datetime.datetime.utcnow(),
+            'username': username,
+            'user_role': user_role
+        }
+        token = jwt.encode(
+            payload, jwt_secret_key, algorithm='HS256')
+        return token
+    except Exception as e:
+        print(e)
+        return e
+
+
+def decodeAuthToken(token):
+    try:
+        payload = jwt.decode(
+            token, jwt_secret_key, algorithms=['HS256'])
+        return payload
+    except jwt.ExpiredSignatureError:
+        return 'Signature expired. Login please'
+    except jwt.InvalidTokenError:
+        return 'Nice try, invalid token. Login please'
 
 
 if __name__ == "__main__":
