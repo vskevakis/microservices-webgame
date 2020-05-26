@@ -27,6 +27,7 @@ class Tictactoe extends React.Component {
       turn: "",
       active: "",
       winner: "",
+      tournament: "",
       waiting: true,
     };
     this.setState = this.setState.bind(this);
@@ -65,12 +66,29 @@ class Tictactoe extends React.Component {
       this.setState((state) => ({ winner: "3" }));
     }
     //console.log("checkEnd,stateactive",this.state.active,this.state.winner ,this.state.board);
-    if (this.state.active === "0") {
+    if (this.state.active === "0" && this.state.tournament==="0") {
       axios
         .post("http://localhost:80/gamemaster/updatescores", this.state)
         .then(
           (response) => {
             console.log("gamemaster/updatescores with success", response);
+          },
+          (error) => {
+            console.log("gamemaster/updatescores Error", error);
+          }
+        );
+      console.log("checkEnd", this.state.winner);
+    }
+    if (this.state.active === "0" && this.state.tournament==="1") {
+      axios
+        .post("http://localhost:80/gamemaster/update_tournament", this.state)
+        .then(
+          (response) => {
+            console.log("gamemaster/updatescores with success", response);
+            this.setState((state) => ({ game_id: response.data.gameid}));
+            setTimeout(() => {
+              this.handleSubmit();
+            }, 10);
           },
           (error) => {
             console.log("gamemaster/updatescores Error", error);
@@ -130,6 +148,7 @@ class Tictactoe extends React.Component {
           turn: this.state.turn,
           active: this.state.active,
           winner: this.state.winner,
+          tournament: this.state.tournament,
         });
       }, 10);
       return;
@@ -153,6 +172,7 @@ class Tictactoe extends React.Component {
       that.setState((state) => ({ turn: data.turn }));
       that.setState((state) => ({ active: data.active }));
       that.setState((state) => ({ winner: data.winner }));
+      that.setState((state) => ({ tournament: data.tournament }));
       that.setState((state) => ({ waiting: false }));
     });
     socket.on("waiting", function () {
@@ -174,6 +194,7 @@ class Tictactoe extends React.Component {
         that.setState((state) => ({ turn: game_info.turn }));
         that.setState((state) => ({ active: game_info.active }));
         that.setState((state) => ({ winner: game_info.winner }));
+        that.setState((state) => ({ tournament: game_info.tournament }));
         that.setState((state) => ({ waiting: false }));
       } else if (game_info.active === "0" && game_info.winner !== "0") {
         that.btn.removeAttribute("disabled");

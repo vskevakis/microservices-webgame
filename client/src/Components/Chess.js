@@ -22,6 +22,7 @@ class My_Chess extends React.Component {
       turn: "",
       active: "",
       winner: "",
+      tournament: "",
       waiting:"waitting to press play",
     };
     this.setState = this.setState.bind(this);
@@ -46,6 +47,7 @@ class My_Chess extends React.Component {
       that.setState((state) => ({ turn: data.turn }));
       that.setState((state) => ({ active: data.active }));
       that.setState((state) => ({ winner: data.winner }));
+      that.setState((state) => ({ tournament: data.tournament }));
       //useless atm not saving it at memory//useless atm not saving it at memory
       that.setState((state) => ({ waiting: "playing" }));
       console.log("playing,that.state.board", that.state.board);
@@ -74,6 +76,7 @@ class My_Chess extends React.Component {
         that.setState((state) => ({ turn: game_info.turn }));
         that.setState((state) => ({ active: game_info.active }));
         that.setState((state) => ({ winner: game_info.winner }));
+        that.setState((state) => ({ tournament: game_info.tournament }));
         //useless atm not saving it at memory     
         console.log("response get_state,that.state.board", that.state.board);
         that.setState((state) => ({ fen: that.state.board }));
@@ -221,6 +224,25 @@ class My_Chess extends React.Component {
             console.log("gamemaster/updatescores Error", error);
           }
         );
+    }
+    if (this.state.active === "0" && this.state.tournament==="1") {
+      axios
+        .post("http://localhost:80/gamemaster/update_tournament", this.state)
+        .then(
+          (response) => {
+            if (response.data.gameid!=='over'){
+              this.setState((state) => ({ game_id: response.data.gameid}));
+              setTimeout(() => {
+                this.handleSubmit();
+              }, 10);
+            }
+            console.log("gamemaster/updatescores with success", response);
+          },
+          (error) => {
+            console.log("gamemaster/updatescores Error", error);
+          }
+        );
+      console.log("checkEnd", this.state.winner);
     }
   }
 
