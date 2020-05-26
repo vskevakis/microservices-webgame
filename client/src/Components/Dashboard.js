@@ -93,6 +93,11 @@ class DashboardPage extends Component {
             </Button>
           </Col>
           <Col md="auto">
+            <Button className="dashboard" href="./tournament">
+              Tournament
+            </Button>
+          </Col>
+          <Col md="auto">
             <Button className="dashboard" href="./logout">
               Logout
             </Button>

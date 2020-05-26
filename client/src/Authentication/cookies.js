@@ -72,3 +72,14 @@ export function checkCookie() {
     return null;
   }
 }
+
+export function checkUser() {
+  let token = getCookie("token");
+  console.log("token is: ", token);
+  let decoded = jwt.decode(token);
+  if (decoded !== null) {
+    return decoded.user_role;
+  } else {
+    return null;
+  }
+}
