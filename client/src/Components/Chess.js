@@ -233,8 +233,6 @@ class My_Chess extends React.Component {
             width={320}
             position={this.state.fen}
             onDrop={this.onDrop}
-            // onMouseOverSquare={onMouseOverSquare}
-            // onMouseOutSquare={onMouseOutSquare}
             boardStyle={{
               borderRadius: "5px",
               boxShadow: `0 5px 15px rgba(0, 0, 0, 0.5)`,
