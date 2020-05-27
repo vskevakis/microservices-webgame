@@ -66,7 +66,7 @@ class Tictactoe extends React.Component {
       this.setState((state) => ({ winner: "3" }));
     }
     //console.log("checkEnd,stateactive",this.state.active,this.state.winner ,this.state.board);
-    if (this.state.active === "0" && this.state.tournament==="0") {
+    if (this.state.active === "0" && this.state.tournament) {
       axios
         .post("http://localhost:80/gamemaster/updatescores", this.state)
         .then(
@@ -79,13 +79,13 @@ class Tictactoe extends React.Component {
         );
       console.log("checkEnd", this.state.winner);
     }
-    if (this.state.active === "0" && this.state.tournament==="1") {
+    if (this.state.active === "0" && this.state.tournament) {
       axios
         .post("http://localhost:80/gamemaster/update_tournament", this.state)
         .then(
           (response) => {
             console.log("gamemaster/updatescores with success", response);
-            this.setState((state) => ({ game_id: response.data.gameid}));
+            this.setState((state) => ({ game_id: response.data.gameid }));
             setTimeout(() => {
               this.handleSubmit();
             }, 10);
@@ -222,18 +222,19 @@ class Tictactoe extends React.Component {
   }
 
   handleSubmit = async (event) => {
-    await axios
-      .post("http://localhost:80/gamemaster/starttictactoe", this.state)
-      .then(
-        (response) => {
-          this.setState((state) => ({ game_id: response.data.gameid }));
-          console.log("Game ID: ", this.state.game_id);
-          //console.log("start ", this.state.game_id);
-        },
-        (error) => {
-          console.log("gamemaster/StartTicTacToe Error", error);
-        }
-      );
+    if (this.state.tournament)
+      await axios
+        .post("http://localhost:80/gamemaster/starttictactoe", this.state)
+        .then(
+          (response) => {
+            this.setState((state) => ({ game_id: response.data.gameid }));
+            console.log("Game ID: ", this.state.game_id);
+            //console.log("start ", this.state.game_id);
+          },
+          (error) => {
+            console.log("gamemaster/StartTicTacToe Error", error);
+          }
+        );
     //console.log("username: ", this.state.username, this.state.game_id,this.game_type);
     socket.emit("start", {
       username: this.state.username,

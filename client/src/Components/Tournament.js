@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Container, Button, Col, Row, Dropdown, Table } from "react-bootstrap";
 import { checkCookie, checkUser } from "../Authentication/cookies";
+import { withRouter } from "react-router-dom";
 import axios from "axios";
 
 import My_Chess from "./Chess";
@@ -13,10 +14,12 @@ function Item(props) {
   } else {
     return (
       <tr>
-        <td onClick={props.onClick}>{props.item.game_type}</td>
-        <td onClick={props.onClick}>{props.item.tour_id}</td>
-        <td onClick={props.onClick}>{props.item.current_players}</td>
-        <Button onClick={props.onClick}>Join Tournament</Button>
+        <td>{props.item.game_type}</td>
+        <td>{props.item.tour_id}</td>
+        <td>{props.item.current_players + "/8"}</td>
+        <td>
+          <Button onClick={props.onClick}>Join Tournament</Button>
+        </td>
       </tr>
     );
   }
@@ -59,7 +62,7 @@ class Tournament extends Component {
         console.log("Tournament List: ", tour_list);
         this.setState({ tour_list });
       });
-    }, 5000);
+    }, 10000);
   }
 
   renderGreetings() {
@@ -132,16 +135,23 @@ class Tournament extends Component {
   }
 
   handleClick(choice) {
-    console.log("i chooooooooose: ", choice);
-    this.setState({ choice });
+    console.log("i chooooooooose: ", choice.tour_id);
     axios
       .post("http://localhost:80/gamemaster/join_Tour", {
-        tour_id: choice,
+        tour_id: choice.tour_id,
         username: checkCookie(),
       })
       .then((response) => {
         console.log(response.data, choice);
       });
+    console.log(choice.game_type);
+    if (choice.game_type === "Tic_tac_toe") {
+      this.props.history.push("/tictactoe");
+    } else if (choice.game_type === "Chess") {
+      this.props.history.push("/chess");
+    } else {
+      console.log("Invalid Game Type ", choice.game_type);
+    }
   }
 
   render() {
@@ -159,18 +169,19 @@ class Tournament extends Component {
         </Row>
         <Row>
           <Col md="auto">
-            <Button className="dashboard" href="./logout">
-              Logout
+            <Button className="dashboard" href="./dashboard">
+              Go Back
             </Button>
           </Col>
         </Row>
         <Row>
-          <Table striped bordered hover>
+          <Table responsive striped bordered hover>
             <thread>
               <tr>
                 <th> Game Type </th>
                 <th> Tournament ID </th>
                 <th> Current Players </th>
+                <th> Press Join </th>
               </tr>
             </thread>
             <tbody>
@@ -178,7 +189,7 @@ class Tournament extends Component {
                 <Item
                   key={index}
                   item={item}
-                  onClick={() => this.handleClick(item.tour_id)}
+                  onClick={() => this.handleClick(item)}
                 />
               ))}
             </tbody>
@@ -189,4 +200,4 @@ class Tournament extends Component {
   }
 }
 
-export default Tournament;
+export default withRouter(Tournament);
