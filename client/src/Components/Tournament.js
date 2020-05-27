@@ -6,6 +6,7 @@ import {
   Row,
   ListGroup,
   Dropdown,
+  Table,
 } from "react-bootstrap";
 import { checkCookie, checkUser } from "../Authentication/cookies";
 import axios from "axios";
@@ -19,13 +20,12 @@ function Item(props) {
     return <h3> Loading Live Tournaments </h3>;
   } else {
     return (
-      <ListGroup.Item action onClick={props.onClick}>
-        <ListGroup horizontal>
-          <ListGroup.Item>{props.item.game_type}</ListGroup.Item>
-          <ListGroup.Item>{props.item.current_players}</ListGroup.Item>
-          <ListGroup.Item>{props.item.tour_id}</ListGroup.Item>
-        </ListGroup>
-      </ListGroup.Item>
+      <tr>
+        <td onClick={props.onClick}>{props.item.game_type}</td>
+        <td onClick={props.onClick}>{props.item.tour_id}</td>
+        <td onClick={props.onClick}>{props.item.current_players}</td>
+        <Button onClick={props.onClick}>Join Tournament</Button>
+      </tr>
     );
   }
 }
@@ -47,7 +47,30 @@ class Tournament extends Component {
     this.setState = this.setState.bind(this);
   }
 
-  componentDidMount() {}
+  componentDidMount() {
+    console.log(this.state.first_time);
+    if (this.state.first_time) {
+      console.log("componentdidmount");
+      axios.get("http://localhost:80/gamemaster/Tour_list").then((response) => {
+        const tour_list = response.data.items;
+        console.log("Tournament List: ", tour_list);
+        this.setState({ tour_list });
+      });
+      this.setState({ first_time: false });
+    }
+  }
+
+  componentDidUpdate() {
+    //Fetch the list every 5 seconds
+    setTimeout(() => {
+      console.log("request");
+      axios.get("http://localhost:80/gamemaster/Tour_list").then((response) => {
+        const tour_list = response.data.items;
+        console.log("Tournament List: ", tour_list);
+        this.setState({ tour_list });
+      });
+    }, 5000);
+  }
 
   renderGreetings() {
     if (
@@ -118,25 +141,6 @@ class Tournament extends Component {
     return <TicTacToe />;
   }
 
-  renderList() {
-    if (this.first_time === true) {
-      axios.get("http://localhost:80/gamemaster/Tour_list").then((response) => {
-        const tour_list = response.data.items;
-        console.log("Tournament List: ", tour_list);
-        this.setState({ tour_list });
-      });
-      this.setState({ first_time: false });
-    }
-    //Fetch the list every 5 seconds
-    setTimeout(() => {
-      axios.get("http://localhost:80/gamemaster/Tour_list").then((response) => {
-        const tour_list = response.data.items;
-        console.log("Tournament List: ", tour_list);
-        this.setState({ tour_list });
-      });
-    }, 10000);
-  }
-
   handleClick(choice) {
     console.log("i chooooooooose: ", choice);
     this.setState({ choice });
@@ -161,7 +165,6 @@ class Tournament extends Component {
           <h4>Join a tournament based on the game you prefer</h4>
         </Row>
         <Row className="justify-content-md-center">
-          <Col>{this.renderList()}</Col>
           <Col>{this.renderOfficial()}</Col>
         </Row>
         <Row>
@@ -172,15 +175,24 @@ class Tournament extends Component {
           </Col>
         </Row>
         <Row>
-          <ListGroup>
-            {this.state.tour_list.map((item, index) => (
-              <Item
-                key={index}
-                item={item}
-                onClick={() => this.handleClick(item.tour_id)}
-              />
-            ))}
-          </ListGroup>
+          <Table striped bordered hover>
+            <thread>
+              <tr>
+                <th> Game Type </th>
+                <th> Tournament ID </th>
+                <th> Current Players </th>
+              </tr>
+            </thread>
+            <tbody>
+              {this.state.tour_list.map((item, index) => (
+                <Item
+                  key={index}
+                  item={item}
+                  onClick={() => this.handleClick(item.tour_id)}
+                />
+              ))}
+            </tbody>
+          </Table>
         </Row>
       </Container>
     );
