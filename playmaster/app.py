@@ -20,6 +20,9 @@ def start_handler(data):
     game_id = data['game_id']
     username = data['username']
     game_type = data['game_type']
+    tour='0'
+    if game_type.__contains__('Tournament'):
+        tour='1'
     if (r.exists(game_id)):
         game_state = json.loads(r.get(game_id))
         if (game_state['player1'] == username):
@@ -34,6 +37,7 @@ def start_handler(data):
                 'turn': username,
                 'active': "1",
                 'winner': game_state['winner'],
+                'tournament': game_state['tournament']
             }
             emit('playing', init_state)
             # emit('playing')  # this propably needs change and are here for reference
@@ -49,6 +53,7 @@ def start_handler(data):
                 'turn': 'not yet',
                 'active': "0",
                 'winner': "0",
+                'tournament': tour
             }
         elif game_type == "Chess":
             init_state = {
@@ -60,6 +65,7 @@ def start_handler(data):
                 'turn': 'not yet',
                 'active': "0",
                 'winner': "0",
+                'tournament': tour
             }
         emit('waiting')  # this propably needs change and are here for reference
     r.set(game_id, json.dumps(init_state))
@@ -89,6 +95,7 @@ def set_state2(data):
         'turn': data['turn'],
         'active': data['active'],
         'winner': data['winner'],
+        'tournament':data['tournament'],
     }
     r.set(data['game_id'], json.dumps(state))
     emit('waiting')
