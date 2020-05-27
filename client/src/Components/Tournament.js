@@ -1,13 +1,5 @@
 import React, { Component } from "react";
-import {
-  Container,
-  Button,
-  Col,
-  Row,
-  ListGroup,
-  Dropdown,
-  Table,
-} from "react-bootstrap";
+import { Container, Button, Col, Row, Dropdown, Table } from "react-bootstrap";
 import { checkCookie, checkUser } from "../Authentication/cookies";
 import axios from "axios";
 
@@ -50,7 +42,6 @@ class Tournament extends Component {
   componentDidMount() {
     console.log(this.state.first_time);
     if (this.state.first_time) {
-      console.log("componentdidmount");
       axios.get("http://localhost:80/gamemaster/Tour_list").then((response) => {
         const tour_list = response.data.items;
         console.log("Tournament List: ", tour_list);
@@ -63,7 +54,6 @@ class Tournament extends Component {
   componentDidUpdate() {
     //Fetch the list every 5 seconds
     setTimeout(() => {
-      console.log("request");
       axios.get("http://localhost:80/gamemaster/Tour_list").then((response) => {
         const tour_list = response.data.items;
         console.log("Tournament List: ", tour_list);
