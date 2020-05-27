@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Container, Button, Col, Row, Table } from "react-bootstrap";
-import { checkCookie } from "../Authentication/cookies";
+import { checkCookie, checkUser } from "../Authentication/cookies";
 import axios from "axios";
 
 class DashboardPage extends Component {
@@ -8,6 +8,7 @@ class DashboardPage extends Component {
     super();
     this.state = {
       username: checkCookie(),
+      user_role: checkUser(),
       t_wins: 0,
       t_ties: 0,
       t_loses: 0,
@@ -41,15 +42,27 @@ class DashboardPage extends Component {
       );
   }
 
+  renderAdmin() {
+    if (this.state.user_role === "admin") {
+      return (
+        <Col md="auto">
+          <Button className="dashboard" href="./admin">
+            Admin Panel
+          </Button>
+        </Col>
+      );
+    }
+  }
+
   render() {
     return (
       <Container bsPrefix="my-container">
         <Row className="justify-content-md-center">
-          <Col></Col>
           <Col md="auto">
             <h4>
-              Welcome {this.state.username}! This is the dashboard and we will
-              display your stats. Feel free to play Tic Tac Toe online.
+              Welcome {this.state.username}! Your role is {this.state.user_role}{" "}
+              This is the dashboard and we will display your stats. Feel free to
+              play Tic Tac Toe online.
             </h4>
           </Col>
         </Row>
@@ -97,6 +110,9 @@ class DashboardPage extends Component {
               Tournament
             </Button>
           </Col>
+        </Row>
+        <Row>
+          {this.renderAdmin()}
           <Col md="auto">
             <Button className="dashboard" href="./logout">
               Logout

@@ -120,45 +120,76 @@ def check_token():
     return jsonify(response)
 
 
-@app.route("/auth/make_admin", methods=["POST"])
-def make_admin():
+# @app.route("/auth/make_admin", methods=["POST"])
+# def make_admin():
+#     username = request.json['username']
+#     user = db.session.query(User).filter_by(username=username).first()
+#     if user is None:
+#         error = 'A User with that username does not exist'
+#         return Response(error, status=400)
+#     if user.user_role == "admin":
+#         error = 'This user is already an admin'
+#         return Response(error, status=400)
+#     user.user_role = "admin"
+#     db.session.commit()
+#     # Generate New Token
+#     token = encodeAuthToken(user.username, user.user_role)
+#     return token
+#     # REMEMBER TO REMOVE DECODE FROM HERE BEFORE PRODUCTION
+#     # dec = decodeAuthToken(token)
+#     # return Response('User promoted to admin. New token ' + str(dec), status=200)
+
+
+# @app.route("/auth/make_official", methods=["POST"])
+# def make_official():
+#     username = request.json['username']
+#     user = db.session.query(User).filter_by(username=username).first()
+#     if user is None:
+#         error = 'A User with that username does not exist'
+#         return Response(error, status=400)
+#     if user.user_role == "official":
+#         error = 'This user is already an official'
+#         return Response(error, status=400)
+
+#     user.user_role = "official"
+#     db.session.commit()
+#     # Generate New Token
+#     token = encodeAuthToken(user.username, user.user_role)
+#     return token
+#     # REMEMBER TO REMOVE DECODE FROM HERE BEFORE PRODUCTION
+#     # dec = decodeAuthToken(token)
+#     # return Response('User promoted to official. New token ' + str(dec), status=200)
+
+
+@app.route("/auth/change_role", methods=["POST"])
+def change_role():
     username = request.json['username']
+    user_role = request.json['user_role']
+    if user_role != "admin" and user_role != "official":
+        error = "This user role is not accepted: "+user_role
+        return Response(error, status=400)
     user = db.session.query(User).filter_by(username=username).first()
     if user is None:
         error = 'A User with that username does not exist'
         return Response(error, status=400)
-    if user.user_role == "admin":
-        error = 'This user is already an admin'
+    if user.user_role == user_role:
+        error = 'User already has this role'
         return Response(error, status=400)
-    user.user_role = "admin"
+    user.user_role = user_role
     db.session.commit()
     # Generate New Token
     token = encodeAuthToken(user.username, user.user_role)
     return token
-    # REMEMBER TO REMOVE DECODE FROM HERE BEFORE PRODUCTION
-    # dec = decodeAuthToken(token)
-    # return Response('User promoted to admin. New token ' + str(dec), status=200)
 
 
-@app.route("/auth/make_official", methods=["POST"])
-def make_official():
-    username = request.json['username']
-    user = db.session.query(User).filter_by(username=username).first()
-    if user is None:
-        error = 'A User with that username does not exist'
-        return Response(error, status=400)
-    if user.user_role == "official":
-        error = 'This user is already an official'
-        return Response(error, status=400)
-
-    user.user_role = "official"
-    db.session.commit()
-    # Generate New Token
-    token = encodeAuthToken(user.username, user.user_role)
-    return token
-    # REMEMBER TO REMOVE DECODE FROM HERE BEFORE PRODUCTION
-    # dec = decodeAuthToken(token)
-    # return Response('User promoted to official. New token ' + str(dec), status=200)
+@app.route("/auth/get_users", methods=['GET'])
+def get_users():
+    users = db.session.query(User).order_by(User.username.asc()).all()
+    users_list = []
+    for user in users:
+        users_list.append({'username': user.username,
+                           'email': user.email, 'user_role': user.user_role})
+    return jsonify(users_list=users_list)
 
 
 # JWT TOKEN

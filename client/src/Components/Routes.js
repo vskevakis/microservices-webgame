@@ -10,6 +10,7 @@ import Dashboard from "./Dashboard";
 import Tictactoe from "./Tictactoe";
 import My_Chess from "./Chess";
 import Tournament from "./Tournament";
+import AdminPanel from "./AdminPanel";
 
 const Routes = () => (
   <Switch>
@@ -21,6 +22,7 @@ const Routes = () => (
     <PrivateRoute path="/tictactoe" component={Tictactoe} />
     <PrivateRoute path="/chess" component={My_Chess} />
     <PrivateRoute path="/tournament" component={Tournament} />
+    <PrivateRoute path="/admin" component={AdminPanel} />
   </Switch>
 );
 
