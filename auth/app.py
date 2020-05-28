@@ -47,6 +47,17 @@ class User(db.Model):
 db.create_all()
 db.session.commit()
 
+admin_user = User(
+    username='admin',
+    email='admin@admin',
+    password=generate_password_hash('admin', method='sha256'),
+    user_role='admin'
+)
+user = db.session.query(User).filter_by(username=admin_user.username).first()
+if user is None:
+    db.session.add(admin_user)
+    db.session.commit()
+
 # CreateUser API
 @app.route("/auth/register", methods=["POST"])
 def register():
@@ -118,47 +129,6 @@ def check_token():
         'user_role': dec['user_role'],
     }
     return jsonify(response)
-
-
-# @app.route("/auth/make_admin", methods=["POST"])
-# def make_admin():
-#     username = request.json['username']
-#     user = db.session.query(User).filter_by(username=username).first()
-#     if user is None:
-#         error = 'A User with that username does not exist'
-#         return Response(error, status=400)
-#     if user.user_role == "admin":
-#         error = 'This user is already an admin'
-#         return Response(error, status=400)
-#     user.user_role = "admin"
-#     db.session.commit()
-#     # Generate New Token
-#     token = encodeAuthToken(user.username, user.user_role)
-#     return token
-#     # REMEMBER TO REMOVE DECODE FROM HERE BEFORE PRODUCTION
-#     # dec = decodeAuthToken(token)
-#     # return Response('User promoted to admin. New token ' + str(dec), status=200)
-
-
-# @app.route("/auth/make_official", methods=["POST"])
-# def make_official():
-#     username = request.json['username']
-#     user = db.session.query(User).filter_by(username=username).first()
-#     if user is None:
-#         error = 'A User with that username does not exist'
-#         return Response(error, status=400)
-#     if user.user_role == "official":
-#         error = 'This user is already an official'
-#         return Response(error, status=400)
-
-#     user.user_role = "official"
-#     db.session.commit()
-#     # Generate New Token
-#     token = encodeAuthToken(user.username, user.user_role)
-#     return token
-#     # REMEMBER TO REMOVE DECODE FROM HERE BEFORE PRODUCTION
-#     # dec = decodeAuthToken(token)
-#     # return Response('User promoted to official. New token ' + str(dec), status=200)
 
 
 @app.route("/auth/change_role", methods=["POST"])
