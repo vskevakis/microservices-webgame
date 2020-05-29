@@ -179,7 +179,8 @@ def updatescores():
         playing = Playing.query.filter_by(player1=username).first()
     else:
         playing = Playing.query.filter_by(player2=username).first()
-    db.session.delete(playing)
+    if playing is not None:
+        db.session.delete(playing)
     db.session.add(scores1)
     db.session.add(scores2)
     db.session.commit()
@@ -503,7 +504,8 @@ def update_tournament():
         else:
             data['gameid'] = 'over'
     playing = Playing.query.filter_by(gameid=gameid).first()
-    db.session.delete(playing)
+    if playing is not None:
+        db.session.delete(playing)
     db.session.add(scores1)
     db.session.add(scores2)
     db.session.commit()
