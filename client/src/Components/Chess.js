@@ -55,8 +55,6 @@ class My_Chess extends React.Component {
       that.game.load(that.state.board);
     });
     socket.on("waiting", function () {
-      //console.log("Waiting");
-      //console.log("Waiting",that.state.game_id);
       setTimeout(function () {
         //console.log("Waiting33");
         socket.emit("get_state", {
@@ -89,7 +87,6 @@ class My_Chess extends React.Component {
           that.setState((state) => ({ waiting: 'playing' }));
         }
       } else if (game_info.active === "0" && game_info.winner !== "0") {
-        //setTimeout(function () {alert("gameover");}, 1000);
         that.btn.removeAttribute("disabled");
         that.setState((state) => ({ waiting: "waiting to press play " }));
         if (game_info.winner === "3") {
@@ -108,7 +105,6 @@ class My_Chess extends React.Component {
           }
         }
       } else {
-        //console.log("response else");
         socket.emit("get_state", {
           game_id: that.state.game_id,
         });
@@ -116,27 +112,87 @@ class My_Chess extends React.Component {
     });
   }
 
+  // handleSubmit = async (event) => {
+  //   await axios
+  //     .post("http://localhost:80/gamemaster/start_Chess", this.state)
+  //     .then(
+  //       (response) => {
+  //         this.setState((state) => ({ game_id: response.data.gameid }));
+  //         console.log("Game ID: ", this.state.game_id);
+  //       },
+  //       (error) => {
+  //         console.log("gamemaster/StartTicTacToe Error", error);
+  //       }
+  //     );
+  //   socket.emit("start", {
+  //     username: this.state.username,
+  //     game_id: this.state.game_id,
+  //     game_type: "Chess",
+  //   });
+  //   this.setState((state) => ({ waiting: "waiting for second player to join" }));
+  //   this.setState((state) => ({ game_type: "Chess" }));
+  //   this.btn.setAttribute("disabled", "disabled");
+  //   //console.log("username: ", this.state.username, this.state.game_id);
+  // };
+
   handleSubmit = async (event) => {
-    await axios
-      .post("http://localhost:80/gamemaster/start_Chess", this.state)
-      .then(
-        (response) => {
-          this.setState((state) => ({ game_id: response.data.gameid }));
-          console.log("Game ID: ", this.state.game_id);
-        },
-        (error) => {
-          console.log("gamemaster/StartTicTacToe Error", error);
-        }
-      );
+    if (typeof this.props.location.state !== 'undefined') {
+      if (!!this.props.location.state.game_id){
+        socket.emit("start", {
+          username: this.state.username,
+          game_id: this.props.location.state.game_id,
+          game_type: "Chess",
+        });
+        this.setState((state) => ({ game_id: this.props.location.state.game_id }));
+        this.setState((state) => ({ tournament: true }));
+        this.setState((state) => ({ game_type:"Chess"}));
+        this.setState((state) => ({ waiting: "waiting for second player to join" }));
+        this.btn.setAttribute("disabled", "disabled");
+      }
+      else{
+        await axios
+          .post("http://localhost:80/gamemaster/start_Chess", this.state)
+          .then(
+            (response) => {
+              this.setState((state) => ({ game_id: response.data.gameid }));
+              console.log("Game ID: ", this.state.game_id);
+            },
+            (error) => {
+              console.log("gamemaster/start_Chess Error", error);
+            }
+          );
+        socket.emit("start", {
+          username: this.state.username,
+          game_id: this.state.game_id,
+          game_type: "Chess",
+        });
+        this.setState((state) => ({ game_type: "Chess" }));
+        this.setState((state) => ({ waiting: "waiting for second player to join" }));
+        this.btn.setAttribute("disabled", "disabled");
+      }
+    }else{
+    if (this.state.game_id===""){
+      await axios
+        .post("http://localhost:80/gamemaster/start_Chess", this.state)
+        .then(
+          (response) => {
+            this.setState((state) => ({ game_id: response.data.gameid }));
+            console.log("Game ID: ", this.state.game_id);
+          },
+          (error) => {
+            console.log("gamemaster/start_Chess Error", error);
+          }
+        );
+      } 
     socket.emit("start", {
       username: this.state.username,
       game_id: this.state.game_id,
       game_type: "Chess",
     });
-    this.setState((state) => ({ waiting: "waiting for second player to join" }));
     this.setState((state) => ({ game_type: "Chess" }));
+    this.setState((state) => ({ waiting: "waiting for second player to join" }));
     this.btn.setAttribute("disabled", "disabled");
-    //console.log("username: ", this.state.username, this.state.game_id);
+    }
   };
 
   onDrop = ({ sourceSquare, targetSquare }) => {
@@ -213,9 +269,9 @@ class My_Chess extends React.Component {
         this.setState((state) => ({ waiting: "Check" }));
       }
     }
-    if (this.state.active === "0") {
+    if (this.state.active === "0" && !this.state.tournament) {
       axios
-        .post("http://localhost:80/gamemaster/updatescores", this.state)
+        .post("http://localhost:80/gamemaster/updatescores", {player1:this.state.player1,player2:this.state.player2,winner:this.state.winner,game_type:'Chess'})
         .then(
           (response) => {
             console.log("gamemaster/updatescores with success", response);
@@ -224,17 +280,20 @@ class My_Chess extends React.Component {
             console.log("gamemaster/updatescores Error", error);
           }
         );
+        this.setState((state) => ({ game_id: "" }));
     }
-    if (this.state.active === "0" && this.state.tournament==="1") {
+    if (this.state.active === "0" && this.state.tournament) {
       axios
-        .post("http://localhost:80/gamemaster/update_tournament", this.state)
+        .post("http://localhost:80/gamemaster/update_tournament", {player1:this.state.player1,player2:this.state.player2,winner:this.state.winner,game_type:'Chess'})
         .then(
           (response) => {
             if (response.data.gameid!=='over'){
               this.setState((state) => ({ game_id: response.data.gameid}));
-              setTimeout(() => {
-                this.handleSubmit();
-              }, 10);
+              socket.emit("start", {
+                username: this.state.username,
+                game_id: response.data.gameid,
+                game_type: "Chess",
+              });
             }
             console.log("gamemaster/updatescores with success", response);
           },

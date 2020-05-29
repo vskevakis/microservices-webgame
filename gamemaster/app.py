@@ -85,9 +85,6 @@ class Queuetournament(db.Model):
                         nullable=False)
     player8 = db.Column(db.String(255),
                         nullable=False)
-    # def json2(self):
-    #     return {"username": self.username, "current_players":self.current_players ,"game_type":self.game_type}
-
 
 class Playing(db.Model):
     __tablename__ = "playing"
@@ -144,8 +141,7 @@ def createUser():
 @app.route("/gamemaster/getscores", methods=["POST"])
 def getscores():
     username = request.json['username']
-    # data = request.get_json()
-    # username = data.get('username')
+
     scores = Userscore.query.filter_by(username=username).first()
     return scores.json()
 
@@ -156,7 +152,6 @@ def updatescores():
     username = request.json['player1']
     username2 = request.json['player2']
     winner = request.json['winner']
-    # "Tic_tac_toe"  # request.json['game_type']
     game_type = request.json['game_type']
     scores1 = Userscore.query.filter_by(username=username).first()
     scores2 = Userscore.query.filter_by(username=username2).first()
@@ -198,15 +193,23 @@ def starttictactoe():
         if Playing.query.filter_by(player1=username).first() is not None:
             playing = db.session.query(Playing).filter_by(
                 player1=username).first()
-            data = {}
-            data['gameid'] = playing.gameid
-            return jsonify(data)
+            if playing.gameid.__contains__('Tic_tac_toe'):
+                data = {}
+                data['gameid'] = playing.gameid
+                return jsonify(data)     
+            else:
+                return Response("error: playing something else already", status=350) 
+            #return jsonify(data)
         if Playing.query.filter_by(player2=username).first() is not None:
             playing = db.session.query(Playing).filter_by(
                 player2=username).first()
-            data = {}
-            data['gameid'] = playing.gameid
-            return jsonify(data)
+            if playing.gameid.__contains__('Tic_tac_toe'):
+                data = {}
+                data['gameid'] = playing.gameid
+                return jsonify(data)     
+            else:
+                return Response("error: playing something else already", status=350) 
+            #return jsonify(data)
         if Queue.query.filter_by(username=username).first() is None:
             if len(db.session.query(Queue).all()) >= 1:
                 queue = db.session.query(Queue).first()
@@ -250,15 +253,21 @@ def start_Chess():
         if Playing.query.filter_by(player1=username).first() is not None:
             playing = db.session.query(Playing).filter_by(
                 player1=username).first()
-            data = {}
-            data['gameid'] = playing.gameid
-            return jsonify(data)
+            if playing.gameid.__contains__('Chess'):
+                data = {}
+                data['gameid'] = playing.gameid
+                return jsonify(data)     
+            else:
+                return Response("error: playing something else already", status=350)  
         if Playing.query.filter_by(player2=username).first() is not None:
             playing = db.session.query(Playing).filter_by(
                 player2=username).first()
-            data = {}
-            data['gameid'] = playing.gameid
-            return jsonify(data)
+            if playing.gameid.__contains__('Chess'):
+                data = {}
+                data['gameid'] = playing.gameid
+                return jsonify(data)     
+            else:
+                return Response("error: playing something else already", status=350)  
         if Queue_Chess.query.filter_by(username=username).first() is None:
             if len(db.session.query(Queue_Chess).all()) >= 1:
                 queue_Chess = db.session.query(Queue_Chess).first()
@@ -298,45 +307,21 @@ def start_Chess():
 
 @app.route("/gamemaster/Tour_list", methods=["GET"])
 def Tour_list():
-    temps = Queuetournament.query.all()
+    temps = Queuetournament.query.order_by(Queuetournament.current_players.desc(),Queuetournament.tour_id.desc()).all()
     data = []
-    counter = 0
     for temp in temps:
-        counter = counter+1
         data.append({'tour_id': temp.tour_id,
                      'current_players': temp.current_players, 'game_type': temp.game_type})
     return jsonify(items=data)
 
-
-@app.route("/gamemaster/Tour_get_game_id", methods=["POST"])
-def Tour_get_game_id():
-    username = request.json['username']
-    tour_id = request.json['tour_id']
-    data = {}
-    if Tournament.query.filter(and_(Tournament.tour_id == tour_id, Tournament.player1 == username)).first() is not None:
-        temp = Tournament.query.filter(
-            and_(Tournament.tour_id == tour_id, Tournament.player1 == username)).first()
-        data['gameid'] = temp.gameid
-        return jsonify(data)
-    if Tournament.query.filter(and_(Tournament.tour_id == tour_id, Tournament.player2 == username)).first() is not None:
-        temp = Tournament.query.filter(
-            and_(Tournament.tour_id == tour_id, Tournament.player2 == username)).first()
-        data['gameid'] = temp.gameid
-        return jsonify(data)
-    return Response("error: Tour_get_game_id not found", status=401)
-
-
 @app.route("/gamemaster/start_Tour", methods=["POST"])
 def start_Tour():
-    # username = request.json['username']
     role = request.json['user_role']
     game_type = request.json['game_type']
     if role == 'admin' or role == 'official':
         now = datetime.now()
         dt_string = now.strftime("%d/%m/%Y %H:%M:%S.%f")[:-3]
-        tourid = "Tournament"+game_type+"_"+dt_string
-        # data = {}
-        # data['gameid'] = tourid
+        tourid = "Tournament "+dt_string
         queuetournament = Queuetournament(
             tour_id=tourid,
             current_players=0,
@@ -361,48 +346,15 @@ def start_Tour():
 def join_Tour():
     username = request.json['username']
     tour_id = request.json['tour_id']
+    #current_players = request.json['current_players']
+    #current_players = current_players+1
+    data={}
+    queue = Queuetournament.query.filter_by(tour_id=tour_id).first()
     if Userscore.query.filter_by(username=username).first() is not None and Queuetournament.query.filter_by(tour_id=tour_id).first() is not None:
-        queue = Queuetournament.query.filter_by(tour_id=tour_id).first()
-        if queue.current_players == 7:
+        if queue.current_players == 0:
             # queue = Queuetournament.query.filter_by(tour_id=tour_id)
             now = datetime.now()
             dt_string = now.strftime("%d/%m/%Y %H:%M:%S.%f")[:-3]
-            tournament = Tournament(
-                tour_id=queue.tour_id,
-                game_type=queue.game_type,
-                game_number='game1',
-                gameid="Tournament_"+'game1_'+queue.game_type+"_"+dt_string,
-                player1=queue.player1,
-                player2=queue.player2,
-                winner='not yet'
-            )
-            tournament2 = Tournament(
-                tour_id=queue.tour_id,
-                game_type=queue.game_type,
-                game_number='game2',
-                gameid="Tournament_"+'game2_'+queue.game_type+"_"+dt_string,
-                player1=queue.player3,
-                player2=queue.player4,
-                winner='not yet'
-            )
-            tournament3 = Tournament(
-                tour_id=queue.tour_id,
-                game_type=queue.game_type,
-                game_number='game3',
-                gameid="Tournament_"+'game3_'+queue.game_type+"_"+dt_string,
-                player1=queue.player5,
-                player2=queue.player6,
-                winner='not yet'
-            )
-            tournament4 = Tournament(
-                tour_id=queue.tour_id,
-                game_type=queue.game_type,
-                game_number='game4',
-                gameid="Tournament_"+'game4_'+queue.game_type+"_"+dt_string,
-                player1=queue.player7,
-                player2=username,
-                winner='not yet'
-            )
             tournament5 = Tournament(
                 tour_id=queue.tour_id,
                 game_type=queue.game_type,
@@ -430,39 +382,72 @@ def join_Tour():
                 player2='not yet',
                 winner='not yet'
             )
-            db.session.delete(queue)
-            db.session.add(tournament)
-            db.session.add(tournament2)
-            db.session.add(tournament3)
-            db.session.add(tournament4)
             db.session.add(tournament5)
             db.session.add(tournament6)
             db.session.add(tournament7)
             db.session.commit()
-            return Response("Successful join_Tour and Queuetournament deleted", status=200)
-        else:
-            # queue = Queuetournament.query.filter_by(tour_id=tour_id)
-            if queue.player1 == username or queue.player2 == username or queue.player3 == username or queue.player4 == username or queue.player5 == username or queue.player6 == username or queue.player7 == username:
-                return Response("user already in tournament", status=210)
-            if queue.player1 == 'not yet':
-                queue.player1 = username
-            elif queue.player2 == 'not yet':
-                queue.player2 = username
-            elif queue.player3 == 'not yet':
-                queue.player3 = username
-            elif queue.player4 == 'not yet':
-                queue.player4 = username
-            elif queue.player5 == 'not yet':
-                queue.player5 = username
-            elif queue.player6 == 'not yet':
-                queue.player6 = username
-            elif queue.player7 == 'not yet':
-                queue.player7 = username
-            queue.current_players = queue.current_players + 1
+        if queue.player1 == 'not yet':
+            queue.player1 = username
+        elif queue.player2 == 'not yet':
+            queue.player2 = username
+        elif queue.player3 == 'not yet':
+            queue.player3 = username
+        elif queue.player4 == 'not yet':
+            queue.player4 = username
+        elif queue.player5 == 'not yet':
+            queue.player5 = username
+        elif queue.player6 == 'not yet':
+            queue.player6 = username
+        elif queue.player7 == 'not yet':
+            queue.player7 = username
+        queue.current_players = queue.current_players + 1
+        asdasd = queue.current_players
+        db.session.commit()
+        queue2 = Queuetournament.query.filter_by(tour_id=tour_id).first()
+        if (asdasd) % 2 == 1:
+            current_player=(asdasd//2) + (asdasd % 2)
+            temp2='game'+str(current_player)
+            now = datetime.now()
+            dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+            gameid="Tournament_"+temp2+'_'+queue2.game_type+"_"+dt_string
+            tournament = Tournament(
+                tour_id=tour_id,
+                game_type=queue2.game_type,
+                game_number=temp2,
+                gameid=gameid,
+                player1=username,
+                player2='not yet',
+                winner='not yet'
+            )
+            db.session.add(tournament)
             db.session.commit()
-            return Response("Successful join_Tour", status=200)
+            data['gameid'] = gameid
+            data['current_players'] =  asdasd
+            return jsonify(data)
+        else:
+            temporary='game'+str(asdasd//2)
+            if asdasd==8:
+                db.session.delete(queue2)
+                db.session.commit()
+            temp = Tournament.query.filter_by(tour_id=tour_id).filter_by(game_number=temporary).first()
+            if temp is not None:
+                temp.player2=username
+                data['gameid'] = temp.gameid
+                data['current_players'] =  asdasd
+                data['current_playerswwww'] = 'game'+str(asdasd//2)
+                playing = Playing(
+                    gameid=temp.gameid,
+                    player1=temp.player1,
+                    player2=username
+                )
+                db.session.add(playing)
+                db.session.commit()
+                return jsonify(data)
+            else:
+
+                return Response("error join_Tour", status=451)
     else:
-        return Response("error join_Tour", status=450)
+        return jsonify(data)
 
 
 @app.route("/gamemaster/update_tournament", methods=["POST"])
@@ -471,7 +456,6 @@ def update_tournament():
     username2 = request.json['player2']
     gameid = request.json['game_id']
     winner = request.json['winner']
-    # "Tic_tac_toe"  # request.json['game_type']
     game_type = request.json['game_type']
     scores1 = Userscore.query.filter_by(username=username).first()
     scores2 = Userscore.query.filter_by(username=username2).first()
@@ -495,46 +479,35 @@ def update_tournament():
         else:
             scores1.tour_t_ties = scores1.tour_t_ties + 1
             scores2.tour_t_ties = scores2.tour_t_ties + 1
-    if Playing.query.filter_by(player1=username).first() is not None:
-        playing = Playing.query.filter_by(player1=username).first()
-    else:
-        playing = Playing.query.filter_by(player2=username).first()
     data = {}
     if Tournament.query.filter_by(gameid=gameid).first() is not None:
         temp = Tournament.query.filter_by(gameid=gameid).first()
         if temp.game_number == 'game1':
-            # tour_id==temp.tour_id game_number=='game5'
-            temp2 = Tournament.query.filter(and_(
-                Tournament.tour_id == temp.tour_id, Tournament.game_number == 'game5')).first()
+            temp2=Tournament.query.filter_by(tour_id=temp.tour_id).filter_by(game_number='game5').first()
             data['gameid'] = temp2.gameid
         elif temp.game_number == 'game2':
-            temp2 = Tournament.query.filter(and_(
-                Tournament.tour_id == temp.tour_id, Tournament.game_number == 'game5')).first()
+            temp2 = Tournament.query.filter_by(tour_id=temp.tour_id).filter_by(game_number='game5').first()
             data['gameid'] = temp2.gameid
         elif temp.game_number == 'game3':
-            temp2 = Tournament.query.filter(and_(
-                Tournament.tour_id == temp.tour_id, Tournament.game_number == 'game6')).first()
+            temp2=Tournament.query.filter_by(tour_id=temp.tour_id).filter_by(game_number='game6').first()
             data['gameid'] = temp2.gameid
         elif temp.game_number == 'game4':
-            temp2 = Tournament.query.filter(and_(
-                Tournament.tour_id == temp.tour_id, Tournament.game_number == 'game6')).first()
+            temp2=Tournament.query.filter_by(tour_id=temp.tour_id).filter_by(game_number='game6').first()
             data['gameid'] = temp2.gameid
         elif temp.game_number == 'game5':
-            temp2 = Tournament.query.filter(and_(
-                Tournament.tour_id == temp.tour_id, Tournament.game_number == 'game7')).first()
+            temp2=Tournament.query.filter_by(tour_id=temp.tour_id).filter_by(game_number='game7').first()
             data['gameid'] = temp2.gameid
         elif temp.game_number == 'game6':
-            temp2 = Tournament.query.filter(and_(
-                Tournament.tour_id == temp.tour_id, Tournament.game_number == 'game7')).first()
+            temp2=Tournament.query.filter_by(tour_id=temp.tour_id).filter_by(game_number='game7').first()
             data['gameid'] = temp2.gameid
         else:
             data['gameid'] = 'over'
+    playing = Playing.query.filter_by(gameid=gameid).first()
     db.session.delete(playing)
     db.session.add(scores1)
     db.session.add(scores2)
     db.session.commit()
     return jsonify(data)
-
 
 if __name__ == "__main__":
     app.run(debug=False)

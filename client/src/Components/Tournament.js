@@ -1,11 +1,14 @@
 import React, { Component } from "react";
-import { Container, Button, Col, Row, Dropdown, Table } from "react-bootstrap";
+import { Container, Button, Col, Row, Dropdown,  DropdownButton,
+  ButtonGroup, Table } from "react-bootstrap";
 import { checkCookie, checkUser } from "../Authentication/cookies";
 import { withRouter } from "react-router-dom";
 import axios from "axios";
 
 import My_Chess from "./Chess";
 import TicTacToe from "./Tictactoe";
+
+
 
 function Item(props) {
   console.log(props.item);
@@ -26,7 +29,7 @@ function Item(props) {
 }
 
 function Create(props) {
-  return <Dropdown.Item onClick={props.onClick}>{props.type}</Dropdown.Item>;
+  return <Dropdown.Item onClick={props.onClick}>{props.name}</Dropdown.Item>;
 }
 
 class Tournament extends Component {
@@ -91,24 +94,19 @@ class Tournament extends Component {
       this.state.user_role === "official"
     ) {
       return (
-        <Row>
+        <Row className="justify-content-md-center">
           <div> Or just create a new tournament</div>
-          <Dropdown>
-            <Dropdown.Toggle variant="success" id="dropdown-basic">
-              Create
-            </Dropdown.Toggle>
-
-            <Dropdown.Menu>
-              <Create
-                name={"Chess"}
-                onClick={() => this.handleCreate("Chess")}
-              />
-              <Create
-                name={"TicTacToe"}
-                onClick={() => this.handleCreate("Tic_tac_toe")}
-              />
-            </Dropdown.Menu>
-          </Dropdown>
+          <DropdownButton
+            as={ButtonGroup}
+            title="Create Tournament"
+            id="bg-nested-dropdown"
+          >
+            <Create name={"Chess"} onClick={() => this.handleCreate("Chess")} />
+            <Create
+              name={"TicTacToe"}
+              onClick={() => this.handleCreate("Tic_tac_toe")}
+            />
+          </DropdownButton>
         </Row>
       );
     }
@@ -135,23 +133,58 @@ class Tournament extends Component {
   }
 
   handleClick(choice) {
-    console.log("i chooooooooose: ", choice.tour_id);
+    console.log("i chooooooooose: ", choice.tour_id,"current players ",choice.current_players);
+    var gameid="";
+    var trash="";
     axios
       .post("http://localhost:80/gamemaster/join_Tour", {
         tour_id: choice.tour_id,
         username: checkCookie(),
       })
       .then((response) => {
-        console.log(response.data, choice);
+        gameid=response.data.gameid;
+        trash=response.data.current_players;
+        console.log("Game ID:  ", gameid,"current_players ID:  ",trash);
+        if (choice.game_type === "Tic_tac_toe") {
+          console.log("Game ID2: ", gameid);
+          this.props.history.push({//("/tictactoe");
+            pathname:"/tictactoe",
+            state: { game_id: gameid }
+        })
+        } else if (choice.game_type === "Chess") {
+          this.props.history.push("/chess");
+        } else {
+          console.log("Invalid Game Type ", choice.game_type);
+        }
       });
     console.log(choice.game_type);
-    if (choice.game_type === "Tic_tac_toe") {
-      this.props.history.push("/tictactoe");
-    } else if (choice.game_type === "Chess") {
-      this.props.history.push("/chess");
-    } else {
-      console.log("Invalid Game Type ", choice.game_type);
-    }
+    
+    // axios
+    // .post("http://localhost:80/gamemaster/Tour_get_game_id", {
+    //   tour_id: choice.tour_id,
+    //   username: checkCookie(),
+    // })
+    // .then(
+    //   (response) => {
+    //     //this.setState((state) => ({ game_id: response.data.gameid }));
+
+    //     //console.log("start ", this.state.game_id);
+    //   },
+    //   (error) => {
+    //     console.log("gamemaster/Tour_get_game_id Error", error);
+    //   }
+    // );
+    // if (choice.game_type === "Tic_tac_toe") {
+    //   console.log("Game ID2: ", gameid);
+    //   this.props.history.push({//("/tictactoe");
+    //     pathname:"/tictactoe",
+    //     state: { game_id: gameid }
+    // })
+    // } else if (choice.game_type === "Chess") {
+    //   this.props.history.push("/chess");
+    // } else {
+    //   console.log("Invalid Game Type ", choice.game_type);
+    // }
   }
 
   render() {

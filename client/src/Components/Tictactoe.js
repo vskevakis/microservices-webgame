@@ -27,7 +27,7 @@ class Tictactoe extends React.Component {
       turn: "",
       active: "",
       winner: "",
-      tournament: "",
+      tournament: false,
       waiting: true,
     };
     this.setState = this.setState.bind(this);
@@ -48,7 +48,6 @@ class Tictactoe extends React.Component {
       const [a, b, c] = lines[i];
       if (board[a] && board[a] === board[b] && board[a] === board[c]) {
         winner = this.state.board[[a]];
-        //console.log("checkEnd ",this.state.board[[a]]);
       }
     }
     return winner;
@@ -65,10 +64,10 @@ class Tictactoe extends React.Component {
       this.setState((state) => ({ active: "0" }));
       this.setState((state) => ({ winner: "3" }));
     }
-    //console.log("checkEnd,stateactive",this.state.active,this.state.winner ,this.state.board);
-    if (this.state.active === "0" && this.state.tournament) {
+    console.log("updating scores first not then ok" ,this.state.game_type,this.state.tournament);
+    if (this.state.active === "0" && !this.state.tournament) {
       axios
-        .post("http://localhost:80/gamemaster/updatescores", this.state)
+        .post("http://localhost:80/gamemaster/updatescores", {player1:this.state.player1,player2:this.state.player2,winner:this.state.winner,game_type:'Tic_tac_toe'})
         .then(
           (response) => {
             console.log("gamemaster/updatescores with success", response);
@@ -78,20 +77,25 @@ class Tictactoe extends React.Component {
           }
         );
       console.log("checkEnd", this.state.winner);
+      this.setState((state) => ({ game_id: "" }));
     }
     if (this.state.active === "0" && this.state.tournament) {
       axios
-        .post("http://localhost:80/gamemaster/update_tournament", this.state)
+        .post("http://localhost:80/gamemaster/update_tournament", {player1:this.state.player1,player2:this.state.player2,winner:this.state.winner,game_type:'Tic_tac_toe',game_id:this.state.game_id})
         .then(
           (response) => {
-            console.log("gamemaster/updatescores with success", response);
-            this.setState((state) => ({ game_id: response.data.gameid }));
-            setTimeout(() => {
-              this.handleSubmit();
-            }, 10);
+            console.log("gamemaster/update_tournament with success", response.data.gameid);
+            if (response.data.gameid!=='over'){
+              this.setState((state) => ({ game_id: response.data.gameid }));
+              socket.emit("start", {
+                username: this.state.username,
+                game_id: response.data.gameid,
+                game_type: "Tic_tac_toe",
+              });
+            }
           },
           (error) => {
-            console.log("gamemaster/updatescores Error", error);
+            console.log("gamemaster/update_tournament Error", error);
           }
         );
       console.log("checkEnd", this.state.winner);
@@ -99,18 +103,13 @@ class Tictactoe extends React.Component {
   }
 
   handleMove(i) {
-    //this.checkEnd();
-    //console.log(this.state.game_id);
-    //console.log("handle move1",i,this.state.active,this.state.turn,this.state.username,this.state.board[i]);
     if (
       this.state.board[i] !== null ||
       this.state.active !== "1" ||
       this.state.username !== this.state.turn
     ) {
-      //console.log("handle move3");
       return;
     }
-    //console.log("handle move");
     this.setState((state) => {
       const board = state.board.map((item, j) => {
         if (j === i && this.state.username !== this.state.player1) {
@@ -126,19 +125,14 @@ class Tictactoe extends React.Component {
       };
     });
     if (this.state.turn === this.state.player1) {
-      //console.log("next turn if palyer2",this.state.player2);
       this.setState({ turn: this.state.player2 });
     } else {
-      //console.log("next turn else player1",this.state.player1);
       this.setState({ turn: this.state.player1 });
     }
-    //console.log("currnet player ,next turn",this.state.username,this.state.turn,this.state.board[i]);
     setTimeout(() => {
-      //console.log("checkEnd",this.state.active,this.state.winner ,this.state.board);
-      //console.log("currnet player ,next turn",this.state.username,this.state.turn,this.state.board[i],this.state.game_id);
       this.checkEnd();
       setTimeout(() => {
-        //console.log("checkEnd",this.state.active,this.state.winner ,this.state.board);
+
         socket.emit("set_state", {
           game_id: this.state.game_id,
           game_type: this.state.game_type,
@@ -153,17 +147,15 @@ class Tictactoe extends React.Component {
       }, 10);
       return;
     }, 10);
-    //console.log("currnet player ,next turn",this.state.username,this.state.turn,this.state.board[i]);
   }
 
   componentDidMount() {
     this.setState((state) => ({ username: checkCookie() }));
     var that = this;
     socket.on("error", function (err) {
-      //console.log("Error: ", err);
+      console.log("Error: ", err);
     });
     socket.on("playing", function (data) {
-      //console.log("Playing",data.game_id);
       that.setState((state) => ({ game_id: data.game_id }));
       that.setState((state) => ({ game_type: data.game_type }));
       that.setState((state) => ({ player1: data.player1 }));
@@ -183,7 +175,6 @@ class Tictactoe extends React.Component {
         });
       }, 1000);
     });
-
     socket.on("response get_state", function (game_info) {
       if (game_info.turn === that.state.username && game_info.active !== "0") {
         that.setState((state) => ({ game_id: game_info.game_id }));
@@ -222,20 +213,52 @@ class Tictactoe extends React.Component {
   }
 
   handleSubmit = async (event) => {
-    if (this.state.tournament)
+    if (typeof this.props.location.state !== 'undefined') {
+      if (!!this.props.location.state.game_id){
+        socket.emit("start", {
+          username: this.state.username,
+          game_id: this.props.location.state.game_id,
+          game_type: "Tic_tac_toe",
+        });
+        this.setState((state) => ({ game_id: this.props.location.state.game_id }));
+        this.setState((state) => ({ tournament: true }));
+        this.setState((state) => ({ game_type:"Tic_tac_toe"}));
+        this.btn.setAttribute("disabled", "disabled");
+      }
+      else{
+        await axios
+          .post("http://localhost:80/gamemaster/starttictactoe", this.state)
+          .then(
+            (response) => {
+              this.setState((state) => ({ game_id: response.data.gameid }));
+              console.log("Game ID: ", this.state.game_id);
+            },
+            (error) => {
+              console.log("gamemaster/StartTicTacToe Error", error);
+            }
+          );
+        socket.emit("start", {
+          username: this.state.username,
+          game_id: this.state.game_id,
+          game_type: "Tic_tac_toe",
+        });
+        this.setState((state) => ({ game_type: "Tic_tac_toe" }));
+        this.btn.setAttribute("disabled", "disabled");
+      }
+    }else{
+    if (this.state.game_id===""){
       await axios
         .post("http://localhost:80/gamemaster/starttictactoe", this.state)
         .then(
           (response) => {
             this.setState((state) => ({ game_id: response.data.gameid }));
             console.log("Game ID: ", this.state.game_id);
-            //console.log("start ", this.state.game_id);
           },
           (error) => {
             console.log("gamemaster/StartTicTacToe Error", error);
           }
         );
-    //console.log("username: ", this.state.username, this.state.game_id,this.game_type);
+      } 
     socket.emit("start", {
       username: this.state.username,
       game_id: this.state.game_id,
@@ -243,7 +266,7 @@ class Tictactoe extends React.Component {
     });
     this.setState((state) => ({ game_type: "Tic_tac_toe" }));
     this.btn.setAttribute("disabled", "disabled");
-    //console.log("username: ", this.state.username, this.state.game_id);
+    }
   };
 
   renderSquare(i) {

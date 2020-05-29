@@ -21,13 +21,14 @@ def start_handler(data):
     username = data['username']
     game_type = data['game_type']
     tour = False
-    if game_type.__contains__('Tournament'):
+    if 'Tournament' in game_id:
         tour = True
     if (r.exists(game_id)):
         game_state = json.loads(r.get(game_id))
         if (game_state['player1'] == username):
             emit('waiting')
         else:
+            emit("asdasd",game_state['game_type'])
             init_state = {
                 'game_id': game_id,
                 'game_type': game_state['game_type'],
@@ -42,11 +43,10 @@ def start_handler(data):
             emit('playing', init_state)
             # emit('playing')  # this propably needs change and are here for reference
     else:
-        # emit('waiting2')
         if game_type == "Tic_tac_toe":
             init_state = {
                 'game_id': game_id,
-                'game_type': "Tic_tac_toe",
+                'game_type': 'Tic_tac_toe',
                 'player1': username,
                 'player2': 'not yet',
                 'board': [None, None, None, None, None, None, None, None, None],
@@ -58,7 +58,7 @@ def start_handler(data):
         elif game_type == "Chess":
             init_state = {
                 'game_id': game_id,
-                'game_type': "Chess",
+                'game_type': 'Chess',
                 'player1': username,
                 'player2': 'not yet',
                 'board': 'start',
