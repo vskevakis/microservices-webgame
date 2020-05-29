@@ -22,7 +22,7 @@ class My_Chess extends React.Component {
       turn: "",
       active: "",
       winner: "",
-      tournament: "",
+      tournament: false,
       waiting:"waitting to press play",
     };
     this.setState = this.setState.bind(this);
@@ -62,7 +62,6 @@ class My_Chess extends React.Component {
         });
       }, 1500);
     });
-
     socket.on("response get_state", function (game_info) {
       //console.log("Waiting22",game_info.turn,that.state.username);
       if (game_info.turn === that.state.username && game_info.active !== "0") {
@@ -111,29 +110,6 @@ class My_Chess extends React.Component {
       }
     });
   }
-
-  // handleSubmit = async (event) => {
-  //   await axios
-  //     .post("http://localhost:80/gamemaster/start_Chess", this.state)
-  //     .then(
-  //       (response) => {
-  //         this.setState((state) => ({ game_id: response.data.gameid }));
-  //         console.log("Game ID: ", this.state.game_id);
-  //       },
-  //       (error) => {
-  //         console.log("gamemaster/StartTicTacToe Error", error);
-  //       }
-  //     );
-  //   socket.emit("start", {
-  //     username: this.state.username,
-  //     game_id: this.state.game_id,
-  //     game_type: "Chess",
-  //   });
-  //   this.setState((state) => ({ waiting: "waiting for second player to join" }));
-  //   this.setState((state) => ({ game_type: "Chess" }));
-  //   this.btn.setAttribute("disabled", "disabled");
-  //   //console.log("username: ", this.state.username, this.state.game_id);
-  // };
 
   handleSubmit = async (event) => {
     if (typeof this.props.location.state !== 'undefined') {
@@ -231,6 +207,7 @@ class My_Chess extends React.Component {
         turn: this.state.turn,
         active: this.state.active,
         winner: this.state.winner,
+        tournament: this.state.tournament,
       });
     }, 10);
     setTimeout(() => {
@@ -280,15 +257,17 @@ class My_Chess extends React.Component {
             console.log("gamemaster/updatescores Error", error);
           }
         );
-        this.setState((state) => ({ game_id: "" }));
+        //this.setState((state) => ({ game_id: "" }));
     }
     if (this.state.active === "0" && this.state.tournament) {
       axios
-        .post("http://localhost:80/gamemaster/update_tournament", {player1:this.state.player1,player2:this.state.player2,winner:this.state.winner,game_type:'Chess'})
+        .post("http://localhost:80/gamemaster/update_tournament", {player1:this.state.player1,player2:this.state.player2,winner:this.state.winner,game_type:'Chess',game_id:this.state.game_id})
         .then(
           (response) => {
             if (response.data.gameid!=='over'){
               this.setState((state) => ({ game_id: response.data.gameid}));
+              this.game.reset();
+              this.setState((state) => ({ board: 'start'}));
               socket.emit("start", {
                 username: this.state.username,
                 game_id: response.data.gameid,

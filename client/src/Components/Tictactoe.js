@@ -77,7 +77,7 @@ class Tictactoe extends React.Component {
           }
         );
       console.log("checkEnd", this.state.winner);
-      this.setState((state) => ({ game_id: "" }));
+      //this.setState((state) => ({ game_id: "" }));
     }
     if (this.state.active === "0" && this.state.tournament) {
       axios

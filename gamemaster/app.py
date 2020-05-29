@@ -193,7 +193,7 @@ def starttictactoe():
         if Playing.query.filter_by(player1=username).first() is not None:
             playing = db.session.query(Playing).filter_by(
                 player1=username).first()
-            if playing.gameid.__contains__('Tic_tac_toe'):
+            if 'Tic_tac_toe' in playing.gameid:
                 data = {}
                 data['gameid'] = playing.gameid
                 return jsonify(data)     
@@ -203,7 +203,7 @@ def starttictactoe():
         if Playing.query.filter_by(player2=username).first() is not None:
             playing = db.session.query(Playing).filter_by(
                 player2=username).first()
-            if playing.gameid.__contains__('Tic_tac_toe'):
+            if 'Tic_tac_toe' in playing.gameid:
                 data = {}
                 data['gameid'] = playing.gameid
                 return jsonify(data)     
@@ -253,7 +253,7 @@ def start_Chess():
         if Playing.query.filter_by(player1=username).first() is not None:
             playing = db.session.query(Playing).filter_by(
                 player1=username).first()
-            if playing.gameid.__contains__('Chess'):
+            if 'Chess' in playing.gameid:
                 data = {}
                 data['gameid'] = playing.gameid
                 return jsonify(data)     
@@ -262,7 +262,7 @@ def start_Chess():
         if Playing.query.filter_by(player2=username).first() is not None:
             playing = db.session.query(Playing).filter_by(
                 player2=username).first()
-            if playing.gameid.__contains__('Chess'):
+            if 'Chess' in playing.gameid:
                 data = {}
                 data['gameid'] = playing.gameid
                 return jsonify(data)     
