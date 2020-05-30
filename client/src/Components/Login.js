@@ -6,6 +6,7 @@ import axios from "axios";
 
 import { checkCookie, setCookie } from "../Authentication/cookies";
 
+const url = process.env.REACT_APP_SERVICE_URL;
 class Login extends Component {
   constructor() {
     super();
@@ -32,7 +33,7 @@ class Login extends Component {
       isAuthenticated: false,
     };
 
-    await axios.post("http://localhost:80/auth/login", user_data).then(
+    await axios.post(url + "/auth/login", user_data).then(
       (response) => {
         setCookie("token", response.data);
         this.setState({ isAuthenticated: true });

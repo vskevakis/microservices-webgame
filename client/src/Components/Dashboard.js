@@ -3,6 +3,8 @@ import { Container, Button, Col, Row, Table } from "react-bootstrap";
 import { checkCookie, checkUser } from "../Authentication/cookies";
 import axios from "axios";
 
+const url = process.env.REACT_APP_SERVICE_URL;
+
 class DashboardPage extends Component {
   constructor() {
     super();
@@ -27,7 +29,7 @@ class DashboardPage extends Component {
 
   componentDidMount() {
     axios
-      .post("http://localhost:80/gamemaster/getscores", {
+      .post(url + "/gamemaster/getscores", {
         username: this.state.username,
       })
       .then(

@@ -16,6 +16,8 @@ import axios from "axios";
 import MyChess from "./Chess";
 import TicTacToe from "./Tictactoe";
 
+const url = process.env.REACT_APP_SERVICE_URL;
+
 function Item(props) {
   console.log(props.item);
   if (props.item.tour_id === null) {
@@ -54,7 +56,7 @@ class Tournament extends Component {
   componentDidMount() {
     console.log(this.state.first_time);
     if (this.state.first_time) {
-      axios.get("http://localhost:80/gamemaster/Tour_list").then((response) => {
+      axios.get(url + "/gamemaster/Tour_list").then((response) => {
         const tour_list = response.data.items;
         console.log("Tournament List: ", tour_list);
         this.setState({ tour_list });
@@ -66,7 +68,7 @@ class Tournament extends Component {
   componentDidUpdate() {
     //Fetch the list every 5 seconds
     setTimeout(() => {
-      axios.get("http://localhost:80/gamemaster/Tour_list").then((response) => {
+      axios.get(url + "/gamemaster/Tour_list").then((response) => {
         const tour_list = response.data.items;
         console.log("Tournament List: ", tour_list);
         this.setState({ tour_list });
@@ -123,7 +125,7 @@ class Tournament extends Component {
 
   handleCreate = async (game_type) => {
     await axios
-      .post("http://localhost:80/gamemaster/start_Tour", {
+      .post(url + "/gamemaster/start_Tour", {
         game_type: game_type,
         user_role: checkUser(),
       })
@@ -150,7 +152,7 @@ class Tournament extends Component {
     var gameid = "";
     var trash = "";
     axios
-      .post("http://localhost:80/gamemaster/join_Tour", {
+      .post(url + "/gamemaster/join_Tour", {
         tour_id: choice.tour_id,
         username: checkCookie(),
       })

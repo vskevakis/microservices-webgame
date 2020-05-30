@@ -8,6 +8,8 @@ import Chessboard from "chessboardjsx";
 
 const socket = io.connect();
 
+const url = process.env.REACT_APP_SERVICE_URL;
+
 class MyChess extends React.Component {
   constructor(props) {
     super(props);
@@ -127,17 +129,15 @@ class MyChess extends React.Component {
         }));
         this.btn.setAttribute("disabled", "disabled");
       } else {
-        await axios
-          .post("http://localhost:80/gamemaster/start_Chess", this.state)
-          .then(
-            (response) => {
-              this.setState((state) => ({ game_id: response.data.gameid }));
-              console.log("Game ID: ", this.state.game_id);
-            },
-            (error) => {
-              console.log("gamemaster/start_Chess Error", error);
-            }
-          );
+        await axios.post(url + "/gamemaster/start_Chess", this.state).then(
+          (response) => {
+            this.setState((state) => ({ game_id: response.data.gameid }));
+            console.log("Game ID: ", this.state.game_id);
+          },
+          (error) => {
+            console.log("gamemaster/start_Chess Error", error);
+          }
+        );
         socket.emit("start", {
           username: this.state.username,
           game_id: this.state.game_id,
@@ -151,17 +151,15 @@ class MyChess extends React.Component {
       }
     } else {
       if (this.state.game_id === "") {
-        await axios
-          .post("http://localhost:80/gamemaster/start_Chess", this.state)
-          .then(
-            (response) => {
-              this.setState((state) => ({ game_id: response.data.gameid }));
-              console.log("Game ID: ", this.state.game_id);
-            },
-            (error) => {
-              console.log("gamemaster/start_Chess Error", error);
-            }
-          );
+        await axios.post(url + "/gamemaster/start_Chess", this.state).then(
+          (response) => {
+            this.setState((state) => ({ game_id: response.data.gameid }));
+            console.log("Game ID: ", this.state.game_id);
+          },
+          (error) => {
+            console.log("gamemaster/start_Chess Error", error);
+          }
+        );
       }
       socket.emit("start", {
         username: this.state.username,
@@ -257,7 +255,7 @@ class MyChess extends React.Component {
     }
     if (this.state.active === "0" && !this.state.tournament) {
       axios
-        .post("http://localhost:80/gamemaster/updatescores", {
+        .post(url + "/gamemaster/updatescores", {
           player1: this.state.player1,
           player2: this.state.player2,
           winner: this.state.winner,
@@ -275,7 +273,7 @@ class MyChess extends React.Component {
     }
     if (this.state.active === "0" && this.state.tournament) {
       axios
-        .post("http://localhost:80/gamemaster/update_tournament", {
+        .post(url + "/gamemaster/update_tournament", {
           player1: this.state.player1,
           player2: this.state.player2,
           winner: this.state.winner,

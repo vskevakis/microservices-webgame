@@ -12,6 +12,8 @@ import {
 import { checkCookie, checkUser } from "../Authentication/cookies";
 import axios from "axios";
 
+const url = process.env.REACT_APP_SERVICE_URL;
+
 function User(props) {
   console.log(props.users);
   return (
@@ -48,7 +50,7 @@ class AdminPanel extends Component {
   }
 
   fetchUsersList() {
-    axios.get("http://localhost:80/auth/get_users").then((response) => {
+    axios.get(url + "/auth/get_users").then((response) => {
       const users_list = response.data.users_list;
       console.log("users fetched");
       this.setState({ users_list: users_list, users_fetched: true });
@@ -60,7 +62,7 @@ class AdminPanel extends Component {
       alert("You cannot change your own role!");
     } else {
       axios
-        .post("http://localhost:80/auth/change_role", {
+        .post(url + "/auth/change_role", {
           username: user.username,
           user_role: role,
         })
