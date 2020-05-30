@@ -8,7 +8,7 @@ import Chessboard from "chessboardjsx";
 
 const socket = io.connect();
 
-class My_Chess extends React.Component {
+class MyChess extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -23,15 +23,14 @@ class My_Chess extends React.Component {
       active: "",
       winner: "",
       tournament: false,
-      waiting:"waitting to press play",
+      waiting: "waitting to press play",
     };
     this.setState = this.setState.bind(this);
   }
 
-
   componentDidMount() {
     this.game = new Chess();
-    
+
     this.setState((state) => ({ username: checkCookie() }));
     var that = this;
     that.game.load(that.state.board);
@@ -74,7 +73,7 @@ class My_Chess extends React.Component {
         that.setState((state) => ({ active: game_info.active }));
         that.setState((state) => ({ winner: game_info.winner }));
         that.setState((state) => ({ tournament: game_info.tournament }));
-        //useless atm not saving it at memory     
+        //useless atm not saving it at memory
         console.log("response get_state,that.state.board", that.state.board);
         that.setState((state) => ({ fen: that.state.board }));
         that.game.load(that.state.board);
@@ -82,11 +81,10 @@ class My_Chess extends React.Component {
           console.log("Check");
           //useless atm not saving it at memory
           that.setState((state) => ({ waiting: "Check" }));
-        }else{
-          that.setState((state) => ({ waiting: 'playing' }));
+        } else {
+          that.setState((state) => ({ waiting: "playing" }));
         }
       } else if (game_info.active === "0" && game_info.winner !== "0") {
-        that.btn.removeAttribute("disabled");
         that.setState((state) => ({ waiting: "waiting to press play " }));
         if (game_info.winner === "3") {
           alert("It's a tie");
@@ -112,20 +110,23 @@ class My_Chess extends React.Component {
   }
 
   handleSubmit = async (event) => {
-    if (typeof this.props.location.state !== 'undefined') {
-      if (!!this.props.location.state.game_id){
+    if (typeof this.props.location.state !== "undefined") {
+      if (!!this.props.location.state.game_id) {
         socket.emit("start", {
           username: this.state.username,
           game_id: this.props.location.state.game_id,
           game_type: "Chess",
         });
-        this.setState((state) => ({ game_id: this.props.location.state.game_id }));
+        this.setState((state) => ({
+          game_id: this.props.location.state.game_id,
+        }));
         this.setState((state) => ({ tournament: true }));
-        this.setState((state) => ({ game_type:"Chess"}));
-        this.setState((state) => ({ waiting: "waiting for second player to join" }));
+        this.setState((state) => ({ game_type: "Chess" }));
+        this.setState((state) => ({
+          waiting: "waiting for second player to join",
+        }));
         this.btn.setAttribute("disabled", "disabled");
-      }
-      else{
+      } else {
         await axios
           .post("http://localhost:80/gamemaster/start_Chess", this.state)
           .then(
@@ -143,31 +144,35 @@ class My_Chess extends React.Component {
           game_type: "Chess",
         });
         this.setState((state) => ({ game_type: "Chess" }));
-        this.setState((state) => ({ waiting: "waiting for second player to join" }));
+        this.setState((state) => ({
+          waiting: "waiting for second player to join",
+        }));
         this.btn.setAttribute("disabled", "disabled");
       }
-    }else{
-    if (this.state.game_id===""){
-      await axios
-        .post("http://localhost:80/gamemaster/start_Chess", this.state)
-        .then(
-          (response) => {
-            this.setState((state) => ({ game_id: response.data.gameid }));
-            console.log("Game ID: ", this.state.game_id);
-          },
-          (error) => {
-            console.log("gamemaster/start_Chess Error", error);
-          }
-        );
-      } 
-    socket.emit("start", {
-      username: this.state.username,
-      game_id: this.state.game_id,
-      game_type: "Chess",
-    });
-    this.setState((state) => ({ game_type: "Chess" }));
-    this.setState((state) => ({ waiting: "waiting for second player to join" }));
-    this.btn.setAttribute("disabled", "disabled");
+    } else {
+      if (this.state.game_id === "") {
+        await axios
+          .post("http://localhost:80/gamemaster/start_Chess", this.state)
+          .then(
+            (response) => {
+              this.setState((state) => ({ game_id: response.data.gameid }));
+              console.log("Game ID: ", this.state.game_id);
+            },
+            (error) => {
+              console.log("gamemaster/start_Chess Error", error);
+            }
+          );
+      }
+      socket.emit("start", {
+        username: this.state.username,
+        game_id: this.state.game_id,
+        game_type: "Chess",
+      });
+      this.setState((state) => ({ game_type: "Chess" }));
+      this.setState((state) => ({
+        waiting: "waiting for second player to join",
+      }));
+      this.btn.setAttribute("disabled", "disabled");
     }
   };
 
@@ -181,7 +186,12 @@ class My_Chess extends React.Component {
     console.log("Source Target Move", sourceSquare, targetSquare, move);
 
     // illegal move
-    if (move === null || this.state.active !== "1" || this.state.username !== this.state.turn) return "snapback";
+    if (
+      move === null ||
+      this.state.active !== "1" ||
+      this.state.username !== this.state.turn
+    )
+      return "snapback";
     if (this.state.turn === this.state.player1) {
       //console.log("next turn if palyer2",this.state.player2);
       this.setState({ turn: this.state.player2 });
@@ -211,7 +221,7 @@ class My_Chess extends React.Component {
       });
     }, 10);
     setTimeout(() => {
-    this.setState((state) => ({ waiting: 'waiting' }));
+      this.setState((state) => ({ waiting: "waiting" }));
     }, 20);
   };
 
@@ -220,21 +230,20 @@ class My_Chess extends React.Component {
       console.log("CheckMate");
       //useless atm not saving it at memory
       this.setState((state) => ({ waiting: "CheckMate" }));
-      if (this.state.username===this.state.player1){
-        this.setState((state) => ({ winner: "1"}));
-        this.setState((state) => ({ active: "0"}));
-      }
-      else{
-        this.setState((state) => ({ winner: "2"}));
-        this.setState((state) => ({ active: "0"}));
+      if (this.state.username === this.state.player1) {
+        this.setState((state) => ({ winner: "1" }));
+        this.setState((state) => ({ active: "0" }));
+      } else {
+        this.setState((state) => ({ winner: "2" }));
+        this.setState((state) => ({ active: "0" }));
       }
     }
     // draw?
     else if (this.game.in_draw()) {
       console.log("DrawMate");
       this.setState((state) => ({ waiting: "DrawMate" }));
-      this.setState((state) => ({ winner: "3"}));
-      this.setState((state) => ({ active: "0"}));
+      this.setState((state) => ({ winner: "3" }));
+      this.setState((state) => ({ active: "0" }));
     }
     // game still on
     else {
@@ -248,7 +257,12 @@ class My_Chess extends React.Component {
     }
     if (this.state.active === "0" && !this.state.tournament) {
       axios
-        .post("http://localhost:80/gamemaster/updatescores", {player1:this.state.player1,player2:this.state.player2,winner:this.state.winner,game_type:'Chess'})
+        .post("http://localhost:80/gamemaster/updatescores", {
+          player1: this.state.player1,
+          player2: this.state.player2,
+          winner: this.state.winner,
+          game_type: "Chess",
+        })
         .then(
           (response) => {
             console.log("gamemaster/updatescores with success", response);
@@ -257,17 +271,24 @@ class My_Chess extends React.Component {
             console.log("gamemaster/updatescores Error", error);
           }
         );
-        //this.setState((state) => ({ game_id: "" }));
+      //this.setState((state) => ({ game_id: "" }));
     }
     if (this.state.active === "0" && this.state.tournament) {
       axios
-        .post("http://localhost:80/gamemaster/update_tournament", {player1:this.state.player1,player2:this.state.player2,winner:this.state.winner,game_type:'Chess',game_id:this.state.game_id})
+        .post("http://localhost:80/gamemaster/update_tournament", {
+          player1: this.state.player1,
+          player2: this.state.player2,
+          winner: this.state.winner,
+          game_type: "Chess",
+          game_id: this.state.game_id,
+        })
         .then(
           (response) => {
-            if (response.data.gameid!=='over'){
-              this.setState((state) => ({ game_id: response.data.gameid}));
+            alert("You won! Click ok and wait for your next game to start!");
+            if (response.data.gameid !== "over") {
+              this.setState((state) => ({ game_id: response.data.gameid }));
               this.game.reset();
-              this.setState((state) => ({ board: 'start'}));
+              this.setState((state) => ({ board: "start" }));
               socket.emit("start", {
                 username: this.state.username,
                 game_id: response.data.gameid,
@@ -299,7 +320,6 @@ class My_Chess extends React.Component {
             }}
           />
 
-          
           <Row className="justify-content-md-center">{this.state.waiting}</Row>
           <Row className="justify-content-md-center playbtn">
             <Col className="justify-content-md-center">
@@ -322,4 +342,4 @@ class My_Chess extends React.Component {
   }
 }
 
-export default My_Chess;
+export default MyChess;

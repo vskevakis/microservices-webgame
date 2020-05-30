@@ -57,6 +57,8 @@ user = db.session.query(User).filter_by(username=admin_user.username).first()
 if user is None:
     db.session.add(admin_user)
     db.session.commit()
+    initscoredb = requests.post(
+        "http://gamemaster:5002/gamemaster/createUser", json={"username": admin_user.username})
 
 # CreateUser API
 @app.route("/auth/register", methods=["POST"])

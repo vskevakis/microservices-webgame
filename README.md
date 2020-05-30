@@ -3,18 +3,31 @@
 Microservices multiplayer webgame for Distributed Systems course TUC
 
 ![Register Page](https://i.imgur.com/kjuBMEw.png)
-![Tournaments Page](https://i.imgur.com/6zN0gTG.png)
-![Admin Panel](https://i.imgur.com/eTTzxAw.png)
+![Tournaments Page](https://imgur.com/PvooUtO)
+![Chess](https://imgur.com/TDbOQUr)
 
-## Installation
+## Build and Run
 
-Installation via docker-compose.
+Running with 3 instances of client/auth and gamemaster.
+This uses load balancing and our failure handling.
+
+```bash
+docker-compose up --build --scale client=3 --scale auth=3 --scale gamemaster=3
+```
+
+Running with one instance of each container.
 
 ```bash
 docker-compose up --build
 ```
 
-**_NOTE_** Administrator is admin | admin
+## Remove
+
+```bash
+docker-compose down
+```
+
+**_NOTE_** Default administrator is admin | admin
 
 ## Nginx Front-End
 
@@ -28,8 +41,10 @@ http://localhost:80/
 - [x] play tictactoe/ chess
 - [x] user stats
 - [x] tournaments
-- [ ] implement docker swarm
+- [x] load balancing
+- [x] fail handling
 - [ ] zookeeper
+- [ ] code optimizing
 - [ ] deployment
 
 ## Docker cheatsheet

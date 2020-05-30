@@ -83,13 +83,6 @@ class AdminPanel extends Component {
         </Row>
         <Row>
           <Table responsive striped bordered hover>
-            <thread>
-              <tr>
-                <th> Username </th>
-                <th> Email </th>
-                <th> User Role </th>
-              </tr>
-            </thread>
             <tbody>
               {this.state.users_list.map((user, index) => (
                 <User

@@ -1,14 +1,20 @@
 import React, { Component } from "react";
-import { Container, Button, Col, Row, Dropdown,  DropdownButton,
-  ButtonGroup, Table } from "react-bootstrap";
+import {
+  Container,
+  Button,
+  Col,
+  Row,
+  Dropdown,
+  DropdownButton,
+  ButtonGroup,
+  Table,
+} from "react-bootstrap";
 import { checkCookie, checkUser } from "../Authentication/cookies";
 import { withRouter } from "react-router-dom";
 import axios from "axios";
 
-import My_Chess from "./Chess";
+import MyChess from "./Chess";
 import TicTacToe from "./Tictactoe";
-
-
 
 function Item(props) {
   console.log(props.item);
@@ -76,14 +82,14 @@ class Tournament extends Component {
       return (
         <h4>
           Welcome {this.state.username}! You have {this.state.user_role} rights!
-          Please what game type tournament you would like to create
+          Please choose what tournament you would like to join.
         </h4>
       );
     }
     return (
       <h4>
-        Welcome {this.state.username}! Please what game type tournament you
-        would like to join
+        Welcome {this.state.username}! Please choose what tournament you would
+        like to join.
       </h4>
     );
   }
@@ -95,7 +101,9 @@ class Tournament extends Component {
     ) {
       return (
         <Row className="justify-content-md-center">
-          <div> Or just create a new tournament</div>
+          <div>
+            <h4>Or just create a new tournament</h4>{" "}
+          </div>
           <DropdownButton
             as={ButtonGroup}
             title="Create Tournament"
@@ -125,7 +133,7 @@ class Tournament extends Component {
   };
 
   renderChess() {
-    return <My_Chess />;
+    return <MyChess />;
   }
 
   renderTicTacToe() {
@@ -133,24 +141,30 @@ class Tournament extends Component {
   }
 
   handleClick(choice) {
-    console.log("i chooooooooose: ", choice.tour_id,"current players ",choice.current_players);
-    var gameid="";
-    var trash="";
+    console.log(
+      "i chooooooooose: ",
+      choice.tour_id,
+      "current players ",
+      choice.current_players
+    );
+    var gameid = "";
+    var trash = "";
     axios
       .post("http://localhost:80/gamemaster/join_Tour", {
         tour_id: choice.tour_id,
         username: checkCookie(),
       })
       .then((response) => {
-        gameid=response.data.gameid;
-        trash=response.data.current_players;
-        console.log("Game ID:  ", gameid,"current_players ID:  ",trash);
+        gameid = response.data.gameid;
+        trash = response.data.current_players;
+        console.log("Game ID:  ", gameid, "current_players ID:  ", trash);
         if (choice.game_type === "Tic_tac_toe") {
           console.log("Game ID2: ", gameid);
-          this.props.history.push({//("/tictactoe");
-            pathname:"/tictactoe",
-            state: { game_id: gameid }
-        })
+          this.props.history.push({
+            //("/tictactoe");
+            pathname: "/tictactoe",
+            state: { game_id: gameid },
+          });
         } else if (choice.game_type === "Chess") {
           this.props.history.push("/chess");
         } else {
@@ -158,33 +172,6 @@ class Tournament extends Component {
         }
       });
     console.log(choice.game_type);
-    
-    // axios
-    // .post("http://localhost:80/gamemaster/Tour_get_game_id", {
-    //   tour_id: choice.tour_id,
-    //   username: checkCookie(),
-    // })
-    // .then(
-    //   (response) => {
-    //     //this.setState((state) => ({ game_id: response.data.gameid }));
-
-    //     //console.log("start ", this.state.game_id);
-    //   },
-    //   (error) => {
-    //     console.log("gamemaster/Tour_get_game_id Error", error);
-    //   }
-    // );
-    // if (choice.game_type === "Tic_tac_toe") {
-    //   console.log("Game ID2: ", gameid);
-    //   this.props.history.push({//("/tictactoe");
-    //     pathname:"/tictactoe",
-    //     state: { game_id: gameid }
-    // })
-    // } else if (choice.game_type === "Chess") {
-    //   this.props.history.push("/chess");
-    // } else {
-    //   console.log("Invalid Game Type ", choice.game_type);
-    // }
   }
 
   render() {
@@ -193,9 +180,6 @@ class Tournament extends Component {
         <Row className="justify-content-md-center">
           <Col></Col>
           <Col md="auto">{this.renderGreetings()}</Col>
-        </Row>
-        <Row>
-          <h4>Join a tournament based on the game you prefer</h4>
         </Row>
         <Row className="justify-content-md-center">
           <Col>{this.renderOfficial()}</Col>
@@ -212,9 +196,6 @@ class Tournament extends Component {
             <thread>
               <tr>
                 <th> Game Type </th>
-                <th> Tournament ID </th>
-                <th> Current Players </th>
-                <th> Press Join </th>
               </tr>
             </thread>
             <tbody>

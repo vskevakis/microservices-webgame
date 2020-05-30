@@ -15,6 +15,12 @@ class DashboardPage extends Component {
       c_wins: 0,
       c_ties: 0,
       c_loses: 0,
+      tour_t_wins: 0,
+      tour_t_ties: 0,
+      tour_t_loses: 0,
+      tour_c_wins: 0,
+      tour_c_ties: 0,
+      tour_c_loses: 0,
     };
     this.setState = this.setState.bind(this);
   }
@@ -34,6 +40,12 @@ class DashboardPage extends Component {
             c_wins: response.data.c_wins,
             c_ties: response.data.c_ties,
             c_loses: response.data.c_loses,
+            tour_t_wins: response.data.tour_t_wins,
+            tour_t_ties: response.data.tour_t_ties,
+            tour_t_loses: response.data.tour_t_loses,
+            tour_c_wins: response.data.tour_c_wins,
+            tour_c_ties: response.data.tour_c_ties,
+            tour_c_loses: response.data.tour_c_loses,
           }));
         },
         (error) => {
@@ -61,8 +73,6 @@ class DashboardPage extends Component {
           <Col md="auto">
             <h4>
               Welcome {this.state.username}! Your role is {this.state.user_role}{" "}
-              This is the dashboard and we will display your stats. Feel free to
-              play Tic Tac Toe online.
             </h4>
           </Col>
         </Row>
@@ -77,19 +87,34 @@ class DashboardPage extends Component {
             </thead>
             <tbody>
               <tr>
-                <td>Wins</td>
+                <td>Versus Wins</td>
                 <td>{this.state.t_wins}</td>
                 <td>{this.state.c_wins}</td>
               </tr>
               <tr>
-                <td>Ties</td>
+                <td>Versus Ties</td>
                 <td>{this.state.t_ties}</td>
                 <td>{this.state.c_ties}</td>
               </tr>
               <tr>
-                <td>Loses</td>
+                <td>Versus Loses</td>
                 <td>{this.state.t_loses}</td>
                 <td>{this.state.c_loses}</td>
+              </tr>
+              <tr>
+                <td>Tournament Wins</td>
+                <td>{this.state.tour_t_wins}</td>
+                <td>{this.state.tour_c_wins}</td>
+              </tr>
+              <tr>
+                <td>Tournament Ties</td>
+                <td>{this.state.tour_t_ties}</td>
+                <td>{this.state.tour_c_ties}</td>
+              </tr>
+              <tr>
+                <td>Tournament Loses</td>
+                <td>{this.state.tour_t_loses}</td>
+                <td>{this.state.tour_c_loses}</td>
               </tr>
             </tbody>
           </Table>

@@ -1,116 +1,99 @@
-version: '3.4'
+version: "3.4"
 
 services:
-    # zookeeper1:
-    #     image: 'bitnami/zookeeper:latest'
-    #     ports:
-    #       - '2181'
-    #       - '2888'
-    #       - '3888'
-    #     environment:
-    #       - ZOO_SERVER_ID=1
-    #       - ALLOW_ANONYMOUS_LOGIN=yes
-    #       - ZOO_SERVERS=0.0.0.0:2888:3888,zookeeper2:2888:3888,zookeeper3:2888:3888
-    #     #volumes:
-    #     #  - /path/to/zookeeper-backups/latest:/bitnami/zookeeper
-    # zookeeper2:
-    #     image: 'bitnami/zookeeper:latest'
-    #     ports:
-    #       - '2181'
-    #       - '2888'
-    #       - '3888'
-    #     environment:
-    #       - ZOO_SERVER_ID=2
-    #       - ALLOW_ANONYMOUS_LOGIN=yes
-    #       - ZOO_SERVERS=zookeeper1:2888:3888,0.0.0.0:2888:3888,zookeeper3:2888:3888
-    #     #volumes:
-    #     #  - /path/to/zookeeper-backups/latest:/bitnami/zookeeper
-    # zookeeper3:
-    #     image: 'bitnami/zookeeper:latest'
-    #     ports:
-    #       - '2181'
-    #       - '2888'
-    #       - '3888'
-    #     environment:
-    #       - ZOO_SERVER_ID=3
-    #       - ALLOW_ANONYMOUS_LOGIN=yes
-    #       - ZOO_SERVERS=zookeeper1:2888:3888,zookeeper2:2888:3888,0.0.0.0:2888:3888
-    #     #volumes:
-    #     #  - /path/to/zookeeper-backups/latest:/bitnami/zookeeper
-    auth:
-        build: ./auth
-        image: auth:latest
-        env_file: ./auth/postgres.env
-        depends_on:
-            - auth-db
-        ports:
-            - '5000'
-        restart: always
-    auth-db:
-        image: postgres:latest
-        env_file: ./auth/postgres.env
-        restart: always
-    nginx:
-        build: ./nginx
-        image: nginx:latest
-        ports:
-           - 80:80
-        depends_on:
-            - auth
-            - client
-        restart: always
-    client:
-        build: ./client
-        image: client:latest
-        ports:
-            - "3000"
-        environment:
-            - NODE_ENV=development
-            - REACT_APP_SERVICE_URL=http://localhost:80
-            - CHOKIDAR_USEPOLLING=true
-        depends_on:
-            - auth
-        deploy:
-            mode: replicated
-            replicas: 6
-        restart: always
-    # client2:
-    #     build: ./client2
-    #     image: client2:latests
-    #     ports:
-    #         - "3000"
-    #     environment:
-    #         - NODE_ENV=development
-    #         - REACT_APP_SERVICE_URL=http://localhost:80
-    #         - CHOKIDAR_USEPOLLING=true
-    #     depends_on:
-    #         - auth
-    #     deploy:
-    #         mode: replicated
-    #         replicas: 6
-    playmaster:
-        build: ./playmaster
-        image: playmaster:latest
-        env_file: ./playmaster/redis.env
-        ports:
-            - '5001'
-        depends_on:
-            - playmaster-db
-        restart: always
-    playmaster-db:
-        image: redis:latest
-        env_file: ./playmaster/redis.env
-        restart: always
-    gamemaster:
-        build: ./gamemaster
-        image: gamemaster:latest
-        env_file: ./gamemaster/postgres2.env
-        depends_on:
-            - gamemaster-db
-        ports:
-            - '5002'
-        restart: always
-    gamemaster-db:
-        image: postgres:latest
-        env_file: ./gamemaster/postgres2.env
-        restart: always
+  # zookeeper1:
+  #     image: 'bitnami/zookeeper:latest'
+  #     ports:
+  #       - '2181'
+  #       - '2888'
+  #       - '3888'
+  #     environment:
+  #       - ZOO_SERVER_ID=1
+  #       - ALLOW_ANONYMOUS_LOGIN=yes
+  #       - ZOO_SERVERS=0.0.0.0:2888:3888,zookeeper2:2888:3888,zookeeper3:2888:3888
+  #     #volumes:
+  #     #  - /path/to/zookeeper-backups/latest:/bitnami/zookeeper
+  # zookeeper2:
+  #     image: 'bitnami/zookeeper:latest'
+  #     ports:
+  #       - '2181'
+  #       - '2888'
+  #       - '3888'
+  #     environment:
+  #       - ZOO_SERVER_ID=2
+  #       - ALLOW_ANONYMOUS_LOGIN=yes
+  #       - ZOO_SERVERS=zookeeper1:2888:3888,0.0.0.0:2888:3888,zookeeper3:2888:3888
+  #     #volumes:
+  #     #  - /path/to/zookeeper-backups/latest:/bitnami/zookeeper
+  # zookeeper3:
+  #     image: 'bitnami/zookeeper:latest'
+  #     ports:
+  #       - '2181'
+  #       - '2888'
+  #       - '3888'
+  #     environment:
+  #       - ZOO_SERVER_ID=3
+  #       - ALLOW_ANONYMOUS_LOGIN=yes
+  #       - ZOO_SERVERS=zookeeper1:2888:3888,zookeeper2:2888:3888,0.0.0.0:2888:3888
+  #     #volumes:
+  #     #  - /path/to/zookeeper-backups/latest:/bitnami/zookeeper
+  auth:
+    build: ./auth
+    image: auth:latest
+    env_file: ./auth/postgres.env
+    depends_on:
+      - auth-db
+    ports:
+      - "5000"
+    restart: always
+  auth-db:
+    image: postgres:latest
+    env_file: ./auth/postgres.env
+    restart: always
+  nginx:
+    build: ./nginx
+    image: nginx:latest
+    ports:
+      - 80:80
+    depends_on:
+      - auth
+      - client
+    restart: always
+  client:
+    build: ./client
+    image: client:latest
+    ports:
+      - "3000"
+    environment:
+      - NODE_ENV=development
+      - REACT_APP_SERVICE_URL=http://localhost:80
+      - CHOKIDAR_USEPOLLING=true
+    depends_on:
+      - auth
+    restart: always
+  playmaster:
+    build: ./playmaster
+    image: playmaster:latest
+    env_file: ./playmaster/redis.env
+    ports:
+      - "5001"
+    depends_on:
+      - playmaster-db
+    restart: always
+  playmaster-db:
+    image: redis:latest
+    env_file: ./playmaster/redis.env
+    restart: always
+  gamemaster:
+    build: ./gamemaster
+    image: gamemaster:latest
+    env_file: ./gamemaster/postgres2.env
+    depends_on:
+      - gamemaster-db
+    ports:
+      - "5002"
+    restart: always
+  gamemaster-db:
+    image: postgres:latest
+    env_file: ./gamemaster/postgres2.env
+    restart: always
