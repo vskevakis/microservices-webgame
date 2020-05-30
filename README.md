@@ -3,8 +3,11 @@
 Microservices multiplayer webgame for Distributed Systems course TUC
 
 ![Register Page](https://i.imgur.com/kjuBMEw.png)
-![Tournaments Page](https://imgur.com/PvooUtO)
-![Chess](https://imgur.com/TDbOQUr)
+![Chess](https://imgur.com/TDbOQUr.png)
+
+## Architecture
+
+![Architecture](https://imgur.com/eAoTZvl.png)
 
 ## Build and Run
 
