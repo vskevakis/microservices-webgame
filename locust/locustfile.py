@@ -5,12 +5,12 @@ from typing import List
 from locust import HttpLocust, TaskSet, TaskSequence, seq_task, between
 
 # replace the example urls and ports with the appropriate ones
-# AUTH_URL = "http://34.107.76.100:80/auth"
-# GAMEMASTER_URL = "http://34.107.76.100:80/gamemaster"
-# PLAYMASTER_URL = "http://34.107.76.100:80/socket.io"
-AUTH_URL = "http://localhost:80/auth"
-GAMEMASTER_URL = "http://localhost:80/gamemaster"
-PLAYMASTER_URL = "http://localhost:80/socket.io"
+AUTH_URL = "http://34.107.76.100:80/auth"
+GAMEMASTER_URL = "http://34.107.76.100:80/gamemaster"
+PLAYMASTER_URL = "http://34.107.76.100:80/socket.io"
+# AUTH_URL = "http://localhost:80/auth"
+# GAMEMASTER_URL = "http://localhost:80/gamemaster"
+# PLAYMASTER_URL = "http://localhost:80/socket.io"
 
 
 def create_user(self):
@@ -20,7 +20,7 @@ def create_user(self):
         'password': 'password',
     }
     response = self.client.post(
-        f"{AUTH_URL}/register", json=user, name="/auth/register/][user[['username']]")
+        f"{AUTH_URL}/register", json=user, name="/auth/register/")
     # self.item_ids.append(response.json()['item_id'])
     self.usernames.append(user['username'])
 
@@ -31,71 +31,78 @@ def login_user(self, username_idx: int):
         'password': 'password',
     }
     self.client.post(f"{AUTH_URL}/login", json=user,
-                     name="/auth/login/[user['username']]")
+                     name="/auth/login/")
 
 
-# def create_user(self):
-#     response = self.client.post(
-#         f"{USER_URL}/users/create", name="/users/create/")
-#     self.user_id = response.json()['user_id']
+def get_scores(self, username_idx: int):
+    user = {
+        'username': self.usernames[username_idx],
+    }
+    self.client.post(f"{GAMEMASTER_URL}/getscores", json=user,
+                     name="/gamemaster/get_scores")
 
 
-# def add_balance_to_user(self):
-#     balance_to_add = random.randint(10000, 100000)
-#     self.client.post(f"{USER_URL}/users/credit/add/{self.user_id}/{balance_to_add}",
-#                      name="/users/credit/add/[user_id]/[amount]")
+def start_tictactoe(self, username_idx: int):
+    user = {
+        'username': self.usernames[username_idx],
+    }
+    self.client.post(f"{GAMEMASTER_URL}/starttictactoe", json=user,
+                     name="/gamemaster/starttictactoe")
 
 
-# def create_order(self):
-#     response = self.client.post(
-#         f"{ORDER_URL}/orders/create/{self.user_id}", name="/orders/create/[user_id]")
-#     self.order_id = response.json()['order_id']
+def updatescoresTicTacToe(self, username_idx: int):
+    user = {
+        'player1': self.usernames[username_idx],
+        'player2': self.usernames[username_idx],
+        'winner': self.usernames[username_idx],
+        'game_type': 'Tic_tac_toe',
+    }
+    self.client.post(f"{GAMEMASTER_URL}/updatescores", json=user,
+                     name="/gamemaster/updatescores")
 
 
-# def add_item_to_order(self, item_idx: int):
-#     response = self.client.post(f"{ORDER_URL}/orders/addItem/{self.order_id}/{self.item_ids[item_idx]}",
-#                                 name="/orders/addItem/[order_id]/[item_id]", catch_response=True)
-#     if 400 <= response.status_code < 500:
-#         response.failure(response.text)
-#     else:
-#         response.success()
+def start_Chess(self, username_idx: int):
+    user = {
+        'username': self.usernames[username_idx],
+    }
+    self.client.post(f"{GAMEMASTER_URL}/start_Chess", json=user,
+                     name="/gamemaster/start_Chess")
 
 
-# def remove_item_from_order(self, item_idx: int):
-#     response = self.client.delete(f"{ORDER_URL}/orders/removeItem/{self.order_id}/{self.item_ids[item_idx]}",
-#                                   name="/orders/removeItem/[order_id]/[item_id]", catch_response=True)
-#     if 400 <= response.status_code < 500:
-#         response.failure(response.text)
-#     else:
-#         response.success()
+def updatescoresChess(self, username_idx: int):
+    user = {
+        'player1': self.usernames[username_idx],
+        'player2': self.usernames[username_idx],
+        'winner': self.usernames[username_idx],
+        'game_type': 'Chess',
+    }
+    self.client.post(f"{GAMEMASTER_URL}/updatescores", json=user,
+                     name="/gamemaster/updatescores")
 
 
-# def checkout_order(self):
-#     response = self.client.post(f"{ORDER_URL}/orders/checkout/{self.order_id}", name="/orders/checkout/[order_id]",
-#                                 catch_response=True)
-#     if 400 <= response.status_code < 500:
-#         response.failure(response.text)
-#     else:
-#         response.success()
+def start_Tour(self):
+    Tournament = {
+        'user_role': 'admin',
+        'game_type': 'Chess',
+    }
+    response = self.client.post(
+        f"{GAMEMASTER_URL}/start_Tour", json=Tournament, name="/gamemaster/start_Tour")
 
 
-# def checkout_order_that_is_supposed_to_fail(self, reason: int):
-#     response = self.client.post(f"{ORDER_URL}/orders/checkout/{self.order_id}", name="/orders/checkout/[order_id]",
-#                                 catch_response=True)
-#     if 400 <= response.status_code < 500:
-#         response.success()
-#     else:
-#         if reason == 0:
-#             response.failure("This was supposed to fail: Not enough stock")
-#         else:
-#             response.failure("This was supposed to fail: Not enough credit")
+def Tour_list(self):
+    response = self.client.get(
+        f"{GAMEMASTER_URL}/Tour_list", name="/gamemaster/Tour_list")
+    self.tournaments = response.json()['items']
 
 
-# def make_items_stock_zero(self, item_idx: int):
-#     stock_to_subtract = self.client.get(f"{STOCK_URL}/stock/find/{self.item_ids[item_idx]}",
-#                                         name="/stock/find/[item_id]").json()['stock']
-#     self.client.post(f"{STOCK_URL}/stock/subtract/{self.item_ids[item_idx]}/{stock_to_subtract}",
-#                      name="/stock/add/[item_id]/[number]")
+def join_Tour(self, tournament_idx: int, username_idx: int):
+    tour = self.tournaments[tournament_idx]
+    user = {
+        'tour_id': tour['tour_id'],
+        'username': self.usernames[username_idx],
+    }
+    self.client.post(f"{GAMEMASTER_URL}/join_Tour", json=user,
+                     name="/gamemaster/join_Tour")
 
 
 class LoadTest1(TaskSequence):
@@ -103,14 +110,17 @@ class LoadTest1(TaskSequence):
     Scenario where a stock admin creates an item and adds stock to it
     """
     usernames: List[int]
+    tournaments: List[int]
 
     def on_start(self):
         """ on_start is called when a Locust start before any task is scheduled """
         self.usernames = list()
+        self.tournaments = list()
 
     def on_stop(self):
         """ on_stop is called when the TaskSet is stopping """
         self.usernames = list()
+        self.tournaments = list()
 
     @seq_task(1)
     def create_user(self): create_user(self)
@@ -118,243 +128,36 @@ class LoadTest1(TaskSequence):
     @seq_task(2)
     def login_user(self): login_user(self, 0)
 
+    @seq_task(3)
+    def get_scores(self): get_scores(self, 0)
 
-# class LoadTest2(TaskSequence):
-#     """
-#     Scenario where a user checks out an order with one item inside that an admin has added stock to before
-#     """
-#     item_ids: List[int]
-#     user_id: int
-#     order_id: int
+    @seq_task(4)
+    def start_tictactoe(self): start_tictactoe(self, 0)
 
-#     def on_start(self):
-#         self.item_ids = list()
-#         self.user_id = -1
-#         self.order_id = -1
+    @seq_task(5)
+    def start_Chess(self): start_Chess(self, 0)
 
-#     def on_stop(self):
-#         self.item_ids = list()
-#         self.user_id = -1
-#         self.order_id = -1
+    @seq_task(6)
+    def start_Tour(self): start_Tour(self)
 
-#     @seq_task(1)
-#     def admin_creates_item(self): create_item(self)
+    @seq_task(7)
+    def Tour_list(self): Tour_list(self)
 
-#     @seq_task(2)
-#     def admin_adds_stock_to_item(self): add_stock(self, 0)
+    @seq_task(8)
+    def join_Tour(self): join_Tour(self, 0, 0)
 
-#     @seq_task(3)
-#     def user_creates_account(self): create_user(self)
+    @seq_task(9)
+    def updatescoresChess(self): updatescoresChess(self, 0)
 
-#     @seq_task(4)
-#     def user_adds_balance(self): add_balance_to_user(self)
-
-#     @seq_task(5)
-#     def user_creates_order(self): create_order(self)
-
-#     @seq_task(6)
-#     def user_adds_item_to_order(self): add_item_to_order(self, 0)
-
-#     @seq_task(7)
-#     def user_checks_out_order(self): checkout_order(self)
-
-
-# class LoadTest3(TaskSequence):
-#     """
-#     Scenario where a user checks out an order with two items inside that an admin has added stock to before
-#     """
-#     item_ids: List[int]
-#     user_id: int
-#     order_id: int
-
-#     def on_start(self):
-#         self.item_ids = list()
-#         self.user_id = -1
-#         self.order_id = -1
-
-#     def on_stop(self):
-#         self.item_ids = list()
-#         self.user_id = -1
-#         self.order_id = -1
-
-#     @seq_task(1)
-#     def admin_creates_item1(self): create_item(self)
-
-#     @seq_task(2)
-#     def admin_adds_stock_to_item1(self): add_stock(self, 0)
-
-#     @seq_task(3)
-#     def admin_creates_item2(self): create_item(self)
-
-#     @seq_task(4)
-#     def admin_adds_stock_to_item2(self): add_stock(self, 1)
-
-#     @seq_task(5)
-#     def user_creates_account(self): create_user(self)
-
-#     @seq_task(6)
-#     def user_adds_balance(self): add_balance_to_user(self)
-
-#     @seq_task(7)
-#     def user_creates_order(self): create_order(self)
-
-#     @seq_task(8)
-#     def user_adds_item1_to_order(self): add_item_to_order(self, 0)
-
-#     @seq_task(9)
-#     def user_adds_item2_to_order(self): add_item_to_order(self, 1)
-
-#     @seq_task(10)
-#     def user_checks_out_order(self): checkout_order(self)
-
-
-# class LoadTest4(TaskSequence):
-#     """
-#     Scenario where a user adds an item to an order, regrets it and removes it and then adds it back and checks out
-#     """
-#     item_ids: List[int]
-#     user_id: int
-#     order_id: int
-
-#     def on_start(self):
-#         self.item_ids = list()
-#         self.user_id = -1
-#         self.order_id = -1
-
-#     def on_stop(self):
-#         self.item_ids = list()
-#         self.user_id = -1
-#         self.order_id = -1
-
-#     @seq_task(1)
-#     def admin_creates_item(self): create_item(self)
-
-#     @seq_task(2)
-#     def admin_adds_stock_to_item(self): add_stock(self, 0)
-
-#     @seq_task(3)
-#     def user_creates_account(self): create_user(self)
-
-#     @seq_task(4)
-#     def user_adds_balance(self): add_balance_to_user(self)
-
-#     @seq_task(5)
-#     def user_creates_order(self): create_order(self)
-
-#     @seq_task(6)
-#     def user_adds_item_to_order(self): add_item_to_order(self, 0)
-
-#     @seq_task(7)
-#     def user_removes_item_from_order(self): remove_item_from_order(self, 0)
-
-#     @seq_task(8)
-#     def user_adds_item_to_order_again(self): add_item_to_order(self, 0)
-
-#     @seq_task(9)
-#     def user_checks_out_order(self): checkout_order(self)
-
-
-# class LoadTest5(TaskSequence):
-#     """
-#     Scenario that is supposed to fail because the second item does not have enough stock
-#     """
-#     item_ids: List[int]
-#     user_id: int
-#     order_id: int
-
-#     def on_start(self):
-#         self.item_ids = list()
-#         self.user_id = -1
-#         self.order_id = -1
-
-#     def on_stop(self):
-#         self.item_ids = list()
-#         self.user_id = -1
-#         self.order_id = -1
-
-#     @seq_task(1)
-#     def admin_creates_item1(self): create_item(self)
-
-#     @seq_task(2)
-#     def admin_adds_stock_to_item1(self): add_stock(self, 0)
-
-#     @seq_task(3)
-#     def admin_creates_item2(self): create_item(self)
-
-#     @seq_task(4)
-#     def admin_adds_stock_to_item2(self): add_stock(self, 1)
-
-#     @seq_task(5)
-#     def user_creates_account(self): create_user(self)
-
-#     @seq_task(6)
-#     def user_adds_balance(self): add_balance_to_user(self)
-
-#     @seq_task(7)
-#     def user_creates_order(self): create_order(self)
-
-#     @seq_task(8)
-#     def user_adds_item1_to_order(self): add_item_to_order(self, 0)
-
-#     @seq_task(9)
-#     def user_adds_item2_to_order(self): add_item_to_order(self, 1)
-
-#     @seq_task(10)
-#     def stock_admin_makes_item2s_stock_zero(
-#         self): make_items_stock_zero(self, 1)
-
-#     @seq_task(11)
-#     def user_checks_out_order(
-#         self): checkout_order_that_is_supposed_to_fail(self, 0)
-
-
-# class LoadTest6(TaskSequence):
-#     """
-#     Scenario that is supposed to fail because the user does not have enough credit
-#     """
-#     item_ids: List[int]
-#     user_id: int
-#     order_id: int
-
-#     def on_start(self):
-#         self.item_ids = list()
-#         self.user_id = -1
-#         self.order_id = -1
-
-#     def on_stop(self):
-#         self.item_ids = list()
-#         self.user_id = -1
-#         self.order_id = -1
-
-#     @seq_task(1)
-#     def admin_creates_item(self): create_item(self)
-
-#     @seq_task(2)
-#     def admin_adds_stock_to_item(self): add_stock(self, 0)
-
-#     @seq_task(3)
-#     def user_creates_account(self): create_user(self)
-
-#     @seq_task(4)
-#     def user_creates_order(self): create_order(self)
-
-#     @seq_task(5)
-#     def user_adds_item_to_order(self): add_item_to_order(self, 0)
-
-#     @seq_task(6)
-#     def user_checks_out_order(
-#         self): checkout_order_that_is_supposed_to_fail(self, 1)
+    @seq_task(10)
+    def updatescoresTicTacToe(self): updatescoresTicTacToe(self, 0)
 
 
 class LoadTests(TaskSet):
     # [TaskSequence]: [weight of the TaskSequence]
     tasks = {
         LoadTest1: 100,
-        # LoadTest2: 30,
-        # LoadTest3: 25,
-        # LoadTest4: 20,
-        # LoadTest5: 10,
-        # LoadTest6: 10
+
     }
 
 
