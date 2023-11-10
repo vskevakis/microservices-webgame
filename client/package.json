@@ -7,7 +7,7 @@
     "react-dom": "^16.13.1",
     "react-scripts": "1.1.4",
     "react-router-dom": "5.2.0",
-    "axios": "0.19.2",
+    "axios": "1.6.0",
     "semantic-ui-css": "^2.4.1",
     "semantic-ui-react": "0.88.1",
     "bootstrap": "4.4.1",
